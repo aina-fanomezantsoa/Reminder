@@ -2,7 +2,6 @@ import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '@/data/db';
 import { taskService } from '@/data/services/tasks';
-import { planSlotService } from '@/data/services/plan-slots';
 import { createReminderService } from '@/data/services/reminders';
 import { exportBackupJson, importBackupJson } from '@/data/services/backup';
 import { settingsService } from '@/data/services/settings';
@@ -268,23 +267,6 @@ describe('QA service rappels', () => {
     const again = await processDueReminders(now);
     expect(again.fired).toHaveLength(0);
     expect(await db.reminderEvents.count()).toBe(1);
-  });
-});
-
-describe('QA creneaux', () => {
-  const s = { date: '2026-05-01', start: '09:00', end: '10:00', title: 'S' };
-  it('traversant minuit refuse', async () => {
-    expect((await planSlotService.create({ ...s, start: '23:00', end: '01:00' })).ok).toBe(false);
-  });
-  it('conserves par jour, tries par debut', async () => {
-    await planSlotService.create({ ...s, start: '14:00', end: '15:00' });
-    await planSlotService.create(s);
-    await planSlotService.create({ ...s, date: '2026-05-02' });
-    expect((await planSlotService.listByDate('2026-05-01')).map((x) => x.start)).toEqual(['09:00', '14:00']);
-    expect(await planSlotService.listByDate('2026-05-03')).toEqual([]);
-  });
-  it('titre espaces refuse', async () => {
-    expect((await planSlotService.create({ ...s, title: '  ' })).ok).toBe(false);
   });
 });
 

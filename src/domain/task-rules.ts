@@ -23,6 +23,20 @@ export function applyTaskRules<T extends TaskFields>(current: T | null, next: T,
   return out;
 }
 
+/** Progression (0..100) = part de sous-tâches cochées ; 0 s'il n'y en a aucune. */
+export function subtaskProgress(subtasks: readonly { done: boolean }[]): number {
+  if (subtasks.length === 0) return 0;
+  return Math.round((subtasks.filter((s) => s.done).length / subtasks.length) * 100);
+}
+
+/** Colonne imposée par les sous-tâches cochées : toutes → done, 2 ou plus → editing, 1 → in_progress, aucune → null (inchangé). */
+export function statusFromSubtasks(subtasks: readonly { done: boolean }[]): TaskStatus | null {
+  const n = subtasks.filter((s) => s.done).length;
+  if (n === 0) return null;
+  if (n === subtasks.length) return 'done';
+  return n >= 2 ? 'editing' : 'in_progress';
+}
+
 export const DEFAULT_TASK_STATUS: TaskStatus = 'draft';
 
 /** Position pour insérer entre `prev` et `next` (positions réelles) ; null si l'écart est épuisé (rééquilibrer). */

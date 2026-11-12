@@ -2,7 +2,7 @@ import { db } from '../db';
 
 /** Export / import JSON de toutes les données (Should, protège contre la perte du stockage local). */
 export const BACKUP_VERSION = 1;
-const TABLES = ['reminders', 'reminderEvents', 'tasks', 'subtasks', 'comments', 'planSlots', 'settings'] as const;
+const TABLES = ['reminders', 'reminderEvents', 'tasks', 'subtasks', 'comments', 'timeSessions', 'settings'] as const;
 type TableName = (typeof TABLES)[number];
 
 export interface BackupFile {
@@ -52,7 +52,8 @@ export async function importBackupJson(json: string): Promise<ImportResult> {
   }
   const counts = {} as Record<TableName, number>;
   for (const t of TABLES) {
-    const rows = (f.data as Record<string, unknown>)[t];
+    let rows = (f.data as Record<string, unknown>)[t];
+    if (t === 'timeSessions' && rows === undefined) rows = []; // absente des backups v1
     if (!Array.isArray(rows)) return { ok: false, error: `Sauvegarde incomplète : table « ${t} » manquante.` };
     const keyName = db.table(t).schema.primKey.keyPath as string;
     if (rows.some((r) => typeof r !== 'object' || r === null || typeof (r as Record<string, unknown>)[keyName] !== 'string')) {
@@ -64,7 +65,7 @@ export async function importBackupJson(json: string): Promise<ImportResult> {
     await db.transaction('rw', db.tables, async () => {
       for (const t of TABLES) {
         await db.table(t).clear();
-        await db.table(t).bulkAdd((f.data as Record<string, unknown[]>)[t]);
+        await db.table(t).bulkAdd((f.data as Record<string, unknown[]>)[t] ?? []);
       }
     });
   } catch {

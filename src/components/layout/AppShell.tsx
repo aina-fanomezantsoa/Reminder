@@ -19,6 +19,8 @@ import { Drawer } from '@/components/ui/Drawer';
 import { ReminderEditorProvider } from '@/components/reminders/ReminderEditorProvider';
 import { MissedBannerHost } from '@/components/reminders/MissedBannerHost';
 import { StorageGuard } from './StorageGuard';
+import { TimerTitle } from './TimerTitle';
+import { TimerResumeHost } from '@/components/plan-day/TimerResumeBanner';
 
 function breadcrumbFor(pathname: string): BreadcrumbItem[] {
   if (pathname.startsWith('/tasks')) return [{ label: 'Tâches', href: '/tasks' }, { label: "Aujourd'hui" }];
@@ -63,7 +65,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="flex min-h-dvh">
           <Sidebar activeHref={pathname} collapsed={collapsed} />
           <div className="flex min-w-0 flex-1 flex-col">
-            <header className="flex items-center justify-between gap-4 px-4 py-4 md:px-8">
+            <header className="flex items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:py-4 md:px-8">
               <div className="flex items-center gap-2">
                 <IconButton
                   label={collapsed ? 'Déplier le menu' : 'Réduire le menu'}
@@ -81,9 +83,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <NotificationStatusChip permission={permission} />
               </div>
             </header>
-            <div className="flex flex-1 flex-col gap-8 px-4 pb-24 md:px-8 md:pb-10 xl:flex-row">
+            <div className="flex flex-1 flex-col gap-8 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:px-8 md:pb-10 xl:flex-row">
               <main id="contenu" tabIndex={-1} className="min-w-0 flex-1 focus:outline-none">
                 <MissedBannerHost />
+                <TimerResumeHost />
                 <StorageGuard>{children}</StorageGuard>
               </main>
               {!compact && (
@@ -94,6 +97,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
         </div>
+        <TimerTitle />
         <BottomNav activeHref={pathname} />
         <Drawer open={drawerOpen} title="Aujourd'hui" onClose={() => setDrawerOpen(false)}>
           {panel}

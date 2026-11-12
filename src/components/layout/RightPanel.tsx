@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useDashboard, usePlanSlots, useTasks } from '@/data/hooks';
-import { planSlotService } from '@/data/services/plan-slots';
+import { useDashboard, useTasks } from '@/data/hooks';
+import { timerService } from '@/data/services/timer';
 import { useToday } from '@/lib/use-today';
 import type { LocalDate, Profile } from '@/domain/types';
 import { CompletedHistogram } from '@/components/dashboard/CompletedHistogram';
@@ -43,7 +43,6 @@ export function RightPanel({ variant, profile, date, onRenameProfile }: RightPan
 function PlanSection({ today }: { today: LocalDate }) {
   const [selected, setSelected] = useState<LocalDate | null>(null);
   const date = selected ?? today;
-  const slots = usePlanSlots(date);
   const tasks = useTasks();
   const toast = useToast();
 
@@ -56,10 +55,6 @@ function PlanSection({ today }: { today: LocalDate }) {
       return fallback;
     }
   };
-  const warn = (res: { ok: boolean; value?: { overlaps: boolean } }) => {
-    if (res.ok && res.value?.overlaps) toast.push({ tone: 'info', message: 'Ce créneau chevauche un autre créneau du jour.' });
-    else if (res.ok) toast.push({ message: 'Créneau enregistré' });
-  };
 
   if (!today) return <Skeleton variant="row" />;
 
@@ -67,23 +62,18 @@ function PlanSection({ today }: { today: LocalDate }) {
     <PlanDayPanel
       date={date}
       today={today}
-      slots={slots}
       tasks={tasks ?? []}
       onDateChange={setSelected}
-      onCreate={async (input) => {
-        const res = await guard(() => planSlotService.create(input), { ok: false as const, errors: {} });
-        warn(res);
-        return res;
+      onStart={async (id) => {
+        const res = await guard(() => timerService.start(id), null);
+        if (res && !res.ok) toast.push({ tone: 'error', message: res.errors.taskId ?? 'Impossible de démarrer le chrono.' });
       }}
-      onUpdate={async (id, input) => {
-        const res = await guard(() => planSlotService.update(id, input), { ok: false as const, errors: {} });
-        warn(res);
-        return res;
-      }}
-      onRemove={async (id) => {
+      onPause={() => guard(() => timerService.pause(), undefined)}
+      onStop={() => guard(() => timerService.stop(), undefined)}
+      onResetDay={async (id, d) => {
         await guard(async () => {
-          await planSlotService.remove(id);
-          toast.push({ message: 'Créneau supprimé' });
+          await timerService.resetDay(id, d);
+          toast.push({ message: 'Temps du jour remis à zéro' });
         }, undefined);
       }}
     />

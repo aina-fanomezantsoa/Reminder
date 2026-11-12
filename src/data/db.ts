@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { PlanSlot, Reminder, ReminderEvent, Subtask, Task, TaskComment } from '@/domain/types';
+import type { Reminder, ReminderEvent, Subtask, Task, TaskComment, TimeSession } from '@/domain/types';
 
 export interface SettingRow {
   key: string;
@@ -12,7 +12,7 @@ export class ReminderDB extends Dexie {
   tasks!: EntityTable<Task, 'id'>;
   subtasks!: EntityTable<Subtask, 'id'>;
   comments!: EntityTable<TaskComment, 'id'>;
-  planSlots!: EntityTable<PlanSlot, 'id'>;
+  timeSessions!: EntityTable<TimeSession, 'id'>;
   settings!: EntityTable<SettingRow, 'key'>;
 
   constructor(name = 'reminder') {
@@ -27,6 +27,7 @@ export class ReminderDB extends Dexie {
       planSlots: 'id, date',
       settings: 'key',
     });
+    this.version(2).stores({ planSlots: null, timeSessions: 'id, taskId, start' });
   }
 }
 

@@ -1,43 +1,50 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { AlertTriangle, CalendarClock, ChevronLeft, ChevronRight, Clock, Pencil, Plus, Trash2 } from 'lucide-react';
-import { cn } from '@/lib/cn';
+import { useId, useMemo, useState } from 'react';
+import { ChevronLeft, ChevronRight, Pause, Play, RotateCcw, Square, Timer } from 'lucide-react';
 import { ACCENT_CLASSES, taskAccent } from '@/lib/accent';
-import { weekdayShortDate } from '@/lib/format';
+import { cn } from '@/lib/cn';
+import { formatDuration, weekdayShortDate } from '@/lib/format';
 import { addDaysLocal } from '@/domain/dates';
-import { slotsOverlap } from '@/domain/slots';
-import type { ID, LocalDate, PlanSlot, PlanSlotResult, Result, SlotInput, Task } from '@/domain/types';
+import { dayMsByTask } from '@/domain/time-sessions';
+import type { ID, LocalDate, Task } from '@/domain/types';
+import { useActiveSession, useDaySessions, useNow, usePausedTaskId } from '@/data/hooks';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { controlClass } from '@/components/ui/Field';
 import { IconButton } from '@/components/ui/IconButton';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { SlotForm } from './SlotForm';
+import { clock } from '@/components/layout/useRunningTimer';
 
 export interface PlanDayPanelProps {
   date: LocalDate;
   today: LocalDate;
-  /** `undefined` pendant le chargement. */
-  slots: PlanSlot[] | undefined;
   tasks: Task[];
-  onCreate: (input: SlotInput) => Promise<Result<PlanSlotResult, SlotInput>>;
-  onUpdate: (id: ID, input: SlotInput) => Promise<Result<PlanSlotResult, SlotInput>>;
-  onRemove: (id: ID) => void | Promise<unknown>;
+  onStart: (taskId: ID) => void | Promise<unknown>;
+  onPause: () => void | Promise<unknown>;
+  onStop: () => void | Promise<unknown>;
+  onResetDay: (taskId: ID, date: LocalDate) => void | Promise<unknown>;
   onDateChange?: (date: LocalDate) => void;
 }
 
-type FormState = { mode: 'create' } | { mode: 'edit'; slot: PlanSlot } | null;
+/** Chronomètre : tâche en cours, temps du jour par tâche, remise à zéro du jour affiché. */
+export function PlanDayPanel({ date, today, tasks, onStart, onPause, onStop, onResetDay, onDateChange }: PlanDayPanelProps) {
+  const selectId = useId();
+  const [picked, setPicked] = useState('');
+  const [reset, setReset] = useState<Task | null>(null);
+  const sessions = useDaySessions(date);
+  const active = useActiveSession();
+  const pausedId = usePausedTaskId();
+  const now = useNow(!!active);
 
-/** Plan du jour : créneaux triés, avertissement de chevauchement, ajout / modification / suppression. */
-export function PlanDayPanel({ date, today, slots, tasks, onCreate, onUpdate, onRemove, onDateChange }: PlanDayPanelProps) {
-  const [form, setForm] = useState<FormState>(null);
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
-
-  const overlapsOf = useMemo(() => {
-    const map = new Map<ID, PlanSlot[]>();
-    for (const s of slots ?? []) map.set(s.id, (slots ?? []).filter((o) => o.id !== s.id && slotsOverlap(s, o)));
-    return map;
-  }, [slots]);
+  const open = tasks.filter((t) => t.status !== 'done');
+  const dayMs = useMemo(() => (sessions ? dayMsByTask(sessions, date, now) : null), [sessions, date, now]);
+  const rows = dayMs ? [...dayMs].filter(([id, ms]) => ms > 0 && tasksById.has(id)).sort((a, b) => b[1] - a[1]) : [];
+  const activeTask = active ? tasksById.get(active.taskId) : undefined;
+  const pausedTask = !active && pausedId ? tasksById.get(pausedId) : undefined;
+  const target = picked || open[0]?.id || '';
 
   const isToday = date === today;
   const label = isToday ? `Aujourd'hui, ${weekdayShortDate(date)}` : weekdayShortDate(date);
@@ -61,76 +68,110 @@ export function PlanDayPanel({ date, today, slots, tasks, onCreate, onUpdate, on
         )}
       </div>
 
-      {slots === undefined ? (
+      {active ? (
+        <div className="flex flex-col gap-3 rounded-xl bg-brand-soft p-4 text-ink">
+          <p className="flex items-center gap-2 text-xs font-medium text-brand">
+            <span aria-hidden className="size-2 animate-pulse rounded-full bg-brand motion-reduce:animate-none" />
+            En cours
+          </p>
+          <p className="truncate text-sm font-medium" title={activeTask?.title}>
+            {activeTask?.title ?? 'Tâche'}
+          </p>
+          <p className="font-display text-2xl font-semibold tabular-nums" role="timer" aria-label={`Temps écoulé : ${formatDuration(now - active.start)}`}>
+            {clock(now - active.start)}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" size="sm" leftIcon={<Pause className="size-4" aria-hidden />} onClick={() => void onPause()}>
+              Pause
+            </Button>
+            <Button variant="secondary" size="sm" leftIcon={<Square className="size-4" aria-hidden />} onClick={() => void onStop()}>
+              Arrêter
+            </Button>
+          </div>
+        </div>
+      ) : pausedTask ? (
+        <div className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
+          <p className="text-xs font-medium text-muted">En pause</p>
+          <p className="truncate text-sm font-medium text-ink" title={pausedTask.title}>
+            {pausedTask.title}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" leftIcon={<Play className="size-4" aria-hidden />} onClick={() => void onStart(pausedTask.id)}>
+              Reprendre
+            </Button>
+            <Button variant="secondary" size="sm" leftIcon={<Square className="size-4" aria-hidden />} onClick={() => void onStop()}>
+              Arrêter
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="flex items-end gap-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <label htmlFor={selectId} className="text-xs font-medium text-ink">
+            Tâche à chronométrer
+          </label>
+          <select id={selectId} value={target} onChange={(e) => setPicked(e.target.value)} disabled={open.length === 0} className={cn(controlClass(), 'min-h-11 truncate')}>
+            {open.length === 0 && <option value="">Aucune tâche en cours</option>}
+            {open.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.title}
+              </option>
+            ))}
+          </select>
+        </div>
+        <Button size="md" disabled={!target} leftIcon={<Play className="size-4" aria-hidden />} onClick={() => void onStart(target)}>
+          Démarrer
+        </Button>
+      </div>
+
+      {sessions === undefined ? (
         <div aria-busy="true" className="flex flex-col gap-2">
           <Skeleton variant="row" />
-          <Skeleton variant="row" />
         </div>
-      ) : slots.length === 0 ? (
-        <div className="flex flex-col items-start gap-3 rounded-xl bg-surface p-4 text-sm text-body shadow-card">
-          <p className="flex items-center gap-3">
-            <CalendarClock className="size-5 shrink-0 text-brand" aria-hidden />
-            {isToday ? 'Rien de prévu aujourd’hui' : 'Rien de prévu ce jour'}
-          </p>
-        </div>
+      ) : rows.length === 0 ? (
+        <p className="flex items-center gap-3 rounded-xl bg-surface p-4 text-sm text-body shadow-card">
+          <Timer className="size-5 shrink-0 text-brand" aria-hidden />
+          {isToday ? 'Aucun temps enregistré aujourd’hui' : 'Aucun temps enregistré ce jour'}
+        </p>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {slots.map((s) => {
-            const task = s.taskId ? tasksById.get(s.taskId) : undefined;
-            const accent = task ? ACCENT_CLASSES[taskAccent(task.id)] : null;
-            const overlaps = overlapsOf.get(s.id) ?? [];
+        <ul aria-label="Temps du jour par tâche" className="flex flex-col gap-2">
+          {rows.map(([id, ms]) => {
+            const task = tasksById.get(id)!;
             return (
-              <li key={s.id} className="group relative flex items-center gap-3 overflow-hidden rounded-xl bg-surface py-3 pl-3 pr-4 shadow-card">
-                {task ? (
-                  <Avatar label={task.title} accent={taskAccent(task.id)} size="md" />
-                ) : (
-                  <span aria-hidden className="flex size-9 shrink-0 items-center justify-center rounded-full bg-stage text-muted">
-                    <Clock className="size-4" />
-                  </span>
-                )}
+              <li key={id} className="relative flex items-center gap-3 overflow-hidden rounded-xl bg-surface py-3 pl-3 pr-4 shadow-card">
+                <Avatar label={task.title} accent={taskAccent(id)} size="md" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-ink">
-                    <time>{s.start}</time> - <time>{s.end}</time>
+                  <p className="truncate text-sm font-medium text-ink" title={task.title}>
+                    {task.title}
                   </p>
-                  <p className="truncate text-xs text-muted" title={s.title}>
-                    {s.title}
-                  </p>
-                  {overlaps.length > 0 && (
-                    <p className="mt-1 flex items-start gap-1 text-xs font-medium text-amber-800">
-                      <AlertTriangle className="mt-px size-3.5 shrink-0" aria-hidden />
-                      Chevauche {overlaps.map((o) => `${o.start} - ${o.end}`).join(', ')}
-                    </p>
-                  )}
+                  <p className="text-xs tabular-nums text-muted">{formatDuration(ms)}</p>
                 </div>
-                <div className="flex shrink-0 opacity-100 transition group-focus-within:opacity-100 group-hover:opacity-100 motion-reduce:transition-none md:opacity-0">
-                  <IconButton label={`Modifier le créneau ${s.start} - ${s.end}`} icon={<Pencil className="size-4" />} onClick={() => setForm({ mode: 'edit', slot: s })} />
-                  <IconButton label={`Supprimer le créneau ${s.start} - ${s.end}`} icon={<Trash2 className="size-4" />} tone="danger" onClick={() => void onRemove(s.id)} />
-                </div>
-                <span aria-hidden className={cn('absolute inset-y-0 right-0 w-1', accent ? accent.strong : 'bg-st-draft')} />
+                <IconButton label={`Remettre à zéro le temps du jour pour ${task.title}`} icon={<RotateCcw className="size-4" />} tone="danger" onClick={() => setReset(task)} />
+                <span aria-hidden className={cn('absolute inset-y-0 right-0 w-1', ACCENT_CLASSES[taskAccent(id)].strong)} />
               </li>
             );
           })}
         </ul>
       )}
 
-      <Button variant="secondary" size="md" leftIcon={<Plus className="size-4" aria-hidden />} onClick={() => setForm({ mode: 'create' })} className="self-start">
-        Créneau
-      </Button>
-
-      {form && (
-        <SlotForm
-          key={form.mode === 'edit' ? form.slot.id : 'create'}
-          date={date}
-          initial={form.mode === 'edit' ? form.slot : undefined}
-          tasks={tasks}
-          onSubmit={(input) => (form.mode === 'edit' ? onUpdate(form.slot.id, input) : onCreate(input))}
-          onDelete={(id) => {
-            void onRemove(id);
-            setForm(null);
-          }}
-          onCancel={() => setForm(null)}
-        />
-      )}
+      <ConfirmDialog
+        open={reset !== null}
+        title="Remettre le jour à zéro ?"
+        description={
+          reset && (
+            <>
+              Seul le temps de <strong>{reset.title}</strong> enregistré le <strong>{weekdayShortDate(date)}</strong> sera effacé. Le temps des autres jours est conservé.
+            </>
+          )
+        }
+        confirmLabel="Effacer ce jour"
+        onCancel={() => setReset(null)}
+        onConfirm={() => {
+          if (reset) void onResetDay(reset.id, date);
+          setReset(null);
+        }}
+      />
     </div>
   );
 }

@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { Bell, CalendarRange, LayoutDashboard, ListChecks, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { formatDuration } from '@/lib/format';
+import { clock, useRunningTimer } from './useRunningTimer';
 
 export const NAV_ITEMS: ReadonlyArray<{ href: string; label: string; short: string; Icon: LucideIcon }> = [
   { href: '/', label: 'Tableau de bord', short: 'Accueil', Icon: LayoutDashboard },
@@ -52,14 +54,35 @@ export function Sidebar({ activeHref, collapsed }: SidebarProps) {
           })}
         </ul>
       </nav>
+      <SidebarTimer collapsed={collapsed} />
     </aside>
+  );
+}
+
+/** Pastille + durée courte du chrono en cours (lisible aussi sidebar réduite). */
+function SidebarTimer({ collapsed }: { collapsed: boolean }) {
+  const timer = useRunningTimer();
+  if (!timer) return null;
+  const d = formatDuration(timer.elapsed);
+  return (
+    <Link
+      href="/tasks"
+      title={`Chrono en cours : ${timer.title}`}
+      aria-label={`Chrono en cours : ${timer.title}`}
+      className="mt-4 flex flex-col items-center gap-1 rounded-lg bg-brand-soft px-1 py-2 text-xs font-medium tabular-nums text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+    >
+      <span aria-hidden className="size-2 animate-pulse rounded-full bg-brand motion-reduce:animate-none" />
+      <span aria-hidden className={cn('max-w-full truncate', !collapsed && 'xl:hidden')}>{clock(timer.elapsed)}</span>
+      <span aria-hidden className={cn('hidden max-w-full truncate', !collapsed && 'xl:inline')}>{d}</span>
+    </Link>
   );
 }
 
 /** Barre d'onglets fixe en bas (mobile, < 768 px). */
 export function BottomNav({ activeHref }: { activeHref: string }) {
   return (
-    <nav aria-label="Navigation principale" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface md:hidden">
+    <nav aria-label="Navigation principale" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
+      <MobileTimer />
       <ul className="grid grid-cols-4">
         {NAV_ITEMS.map(({ href, short, Icon }) => {
           const active = isActive(activeHref, href);
@@ -82,6 +105,18 @@ export function BottomNav({ activeHref }: { activeHref: string }) {
         })}
       </ul>
     </nav>
+  );
+}
+
+function MobileTimer() {
+  const timer = useRunningTimer();
+  if (!timer) return null;
+  return (
+    <p className="flex items-center justify-center gap-2 border-b border-line bg-brand-soft px-3 py-1 text-xs font-medium text-brand">
+      <span aria-hidden className="size-2 animate-pulse rounded-full bg-brand motion-reduce:animate-none" />
+      <span className="truncate">Chrono : {timer.title}</span>
+      <span className="tabular-nums">{formatDuration(timer.elapsed)}</span>
+    </p>
   );
 }
 

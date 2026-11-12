@@ -4,6 +4,7 @@ import { useId, useState, type FormEvent } from 'react';
 import { Bell, ChevronDown, Trash2 } from 'lucide-react';
 import { STATUS_LABELS, STATUS_STYLES, MAX_TITLE } from '@/lib/constants';
 import { addDaysLocal, todayLocal } from '@/domain/dates';
+import { subtaskProgress } from '@/domain/task-rules';
 import { useTaskComments, useTaskReminders } from '@/data/hooks';
 import { taskService } from '@/data/services/tasks';
 import { TASK_STATUSES, type ID, type Result, type Task, type TaskCardData, type TaskInput, type TaskStatus } from '@/domain/types';
@@ -52,8 +53,10 @@ export function TaskForm({ mode, initial: liveInitial, defaultStatus, defaultDat
   const { requestClose, dialog } = useDirtyGuard(dirty && !submitting, onClose);
 
   const isDone = status === 'done';
-  const progressValue = isDone ? 100 : Number(progress);
-  const progressValid = isDone || (progress.trim() !== '' && Number.isInteger(progressValue) && progressValue >= 0 && progressValue <= 100);
+  const hasSubtasks = (liveInitial?.subtasks.length ?? 0) > 0;
+  const auto = isDone || hasSubtasks;
+  const progressValue = isDone ? 100 : hasSubtasks ? subtaskProgress(liveInitial!.subtasks) : Number(progress);
+  const progressValid = auto || (progress.trim() !== '' && Number.isInteger(progressValue) && progressValue >= 0 && progressValue <= 100);
   const errorCount = Object.values(errors).filter(Boolean).length;
 
   const focusFirst = (errs: FormErrors) => {
@@ -154,7 +157,7 @@ export function TaskForm({ mode, initial: liveInitial, defaultStatus, defaultDat
             <Field
               label="Progression"
               htmlFor={fid('progress-range')}
-              hint={isDone ? 'Une tâche terminée est à 100 %.' : undefined}
+              hint={isDone ? 'Une tâche terminée est à 100 %.' : hasSubtasks ? 'Calculée selon les sous-tâches cochées.' : undefined}
               className="min-w-0"
             >
               <input
@@ -162,7 +165,7 @@ export function TaskForm({ mode, initial: liveInitial, defaultStatus, defaultDat
                 min={0}
                 max={100}
                 step={1}
-                disabled={isDone}
+                disabled={auto}
                 value={progressValid ? progressValue : 0}
                 onChange={(e) => setProgress(e.target.value)}
                 className="h-11 w-full accent-brand"
@@ -175,8 +178,8 @@ export function TaskForm({ mode, initial: liveInitial, defaultStatus, defaultDat
                 min={0}
                 max={100}
                 step={1}
-                disabled={isDone}
-                value={isDone ? '100' : progress}
+                disabled={auto}
+                value={auto ? String(progressValue) : progress}
                 onChange={(e) => setProgress(e.target.value)}
                 className={controlClass(Boolean(errors.progress))}
               />

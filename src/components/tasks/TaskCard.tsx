@@ -1,10 +1,12 @@
 'use client';
 
-import type { HTMLAttributes, Ref } from 'react';
-import { Check, Circle, GripVertical } from 'lucide-react';
+import { useState, type HTMLAttributes, type Ref } from 'react';
+import { Check, Circle, GripVertical, Timer } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { ACCENT_CLASSES, taskAccent } from '@/lib/accent';
-import { dateRange } from '@/lib/format';
+import { taskAccent } from '@/lib/accent';
+import { dateRange, formatDuration } from '@/lib/format';
+import { totalMs } from '@/domain/time-sessions';
+import { useNow, useTaskComments, useTaskSessions } from '@/data/hooks';
 import type { ID, TaskCardData, TaskStatus } from '@/domain/types';
 import { Counter } from '@/components/ui/Counter';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -28,7 +30,6 @@ export interface TaskCardProps {
 const MAX_SUBTASKS = 3;
 
 export function TaskCard({ task, showAttachments, onOpen, onToggleStar, onToggleSubtask, onMove, onDelete, isDragging, dragHandleRef, dragHandleProps }: TaskCardProps) {
-  const accent = ACCENT_CLASSES[taskAccent(task.id)];
   const done = task.status === 'done';
   const doneCount = task.subtasks.filter((s) => s.done).length;
   const visible = task.subtasks.slice(0, MAX_SUBTASKS);
@@ -60,6 +61,7 @@ export function TaskCard({ task, showAttachments, onOpen, onToggleStar, onToggle
       </div>
 
       <p className="text-xs font-medium text-subtle">{dateRange(task.startDate, task.endDate)}</p>
+      <TaskTime taskId={task.id} />
 
       {task.subtasks.length > 0 && (
         <div className="flex flex-col gap-2">
@@ -71,7 +73,7 @@ export function TaskCard({ task, showAttachments, onOpen, onToggleStar, onToggle
           </div>
           <ul className="flex flex-col gap-2">
             {visible.map((s) => (
-              <li key={s.id} className={cn('flex items-center gap-2 rounded-xl border-l-4 bg-canvas pr-2', accent.border)}>
+              <li key={s.id} className="flex items-center gap-2 rounded-xl bg-canvas pr-2">
                 <button
                   type="button"
                   role="checkbox"
@@ -112,7 +114,7 @@ export function TaskCard({ task, showAttachments, onOpen, onToggleStar, onToggle
             <GripVertical className="size-5" aria-hidden />
           </button>
         )}
-        <Counter icon="comment" count={task.commentCount} />
+        <CommentHover taskId={task.id} count={task.commentCount} />
         {showAttachments && <Counter icon="attachment" count={task.attachmentCount} />}
         <span className="ml-auto">
           <StarButton active={task.starred} onToggle={() => onToggleStar(task.id)} label={task.starred ? 'Retirer des favoris' : 'Ajouter aux favoris'} />
@@ -121,5 +123,51 @@ export function TaskCard({ task, showAttachments, onOpen, onToggleStar, onToggle
 
       <ProgressBar value={task.progress} accent={done ? 'done' : taskAccent(task.id)} showLabel label="Progression" />
     </article>
+  );
+}
+
+/** Compteur de commentaires ; au survol (ou focus) affiche leur contenu. Requête chargée seulement à l'ouverture. */
+function CommentHover({ taskId, count }: { taskId: ID; count: number }) {
+  const [open, setOpen] = useState(false);
+  const comments = useTaskComments(open ? taskId : undefined);
+  return (
+    <span
+      className="relative inline-flex"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={() => setOpen(false)}
+    >
+      <button type="button" className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
+        <Counter icon="comment" count={count} />
+      </button>
+      {open && count > 0 && (
+        <div role="tooltip" className="absolute bottom-full left-0 z-20 mb-2 flex max-h-48 w-64 flex-col gap-2 overflow-y-auto rounded-xl bg-surface p-3 text-xs text-ink shadow-card ring-1 ring-black/5">
+          {comments === undefined && <p className="text-subtle">Chargement…</p>}
+          {comments?.map((c) => (
+            <p key={c.id} className="whitespace-pre-wrap break-words">
+              {c.text}
+            </p>
+          ))}
+        </div>
+      )}
+    </span>
+  );
+}
+
+/** Temps total chronométré (monte en direct si la tâche est en cours) ; rien si aucun temps. */
+function TaskTime({ taskId }: { taskId: ID }) {
+  const sessions = useTaskSessions(taskId);
+  const running = !!sessions?.some((s) => s.end === undefined);
+  const now = useNow(running);
+  const ms = sessions ? totalMs(sessions, now) : 0;
+  if (ms <= 0 && !running) return null;
+  return (
+    <p className={cn('flex items-center gap-1 text-xs font-medium tabular-nums', running ? 'text-brand' : 'text-subtle')}>
+      <Timer className="size-3.5" aria-hidden />
+      <span className="sr-only">Temps passé : </span>
+      {formatDuration(ms)}
+      {running && <span className="sr-only"> (chrono en cours)</span>}
+    </p>
   );
 }

@@ -12,7 +12,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
   danger: 'bg-red-600 text-white hover:bg-red-700',
 };
 const SIZES: Record<ButtonSize, string> = {
-  sm: 'min-h-9 px-3 text-xs',
+  sm: 'min-h-11 px-3 text-xs md:min-h-9', // 44 px tactile sur mobile
   md: 'min-h-11 px-5 text-sm',
   lg: 'min-h-12 px-6 text-base',
 };

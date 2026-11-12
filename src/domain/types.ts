@@ -96,14 +96,13 @@ export interface TaskCardData extends Task {
   attachmentCount: number;
 }
 
-// ---------- Plan du jour ----------
-export interface PlanSlot {
+// ---------- Chronomètre ----------
+/** Session de travail sur une tâche ; `end` absent = chrono en cours. */
+export interface TimeSession {
   id: ID;
-  date: LocalDate;
-  start: LocalTime;
-  end: LocalTime;
-  title: string;
-  taskId?: ID;
+  taskId: ID;
+  start: EpochMs;
+  end?: EpochMs;
 }
 
 // ---------- Réglages ----------
@@ -162,21 +161,6 @@ export interface TaskService {
   toggleSubtask(id: ID): Promise<void>;
   removeSubtask(id: ID): Promise<void>;
   addComment(taskId: ID, text: string): Promise<Result<TaskComment, { text: string }>>;
-}
-
-// ---------- Plan du jour : contrat ----------
-export interface SlotInput {
-  date: LocalDate;
-  start: LocalTime;
-  end: LocalTime;
-  title: string;
-  taskId?: ID;
-}
-export type PlanSlotResult = PlanSlot & { overlaps: boolean };
-export interface PlanSlotService {
-  create(input: SlotInput): Promise<Result<PlanSlotResult, SlotInput>>;
-  update(id: ID, input: SlotInput): Promise<Result<PlanSlotResult, SlotInput>>;
-  remove(id: ID): Promise<void>;
 }
 
 // ---------- Statistiques ----------

@@ -176,15 +176,14 @@ interface TaskCardData extends Task {
   attachmentCount: number;
 }
 
-// ---------- Plan du jour ----------
-interface PlanSlot {
+// ---------- Plan du jour (chronomètre ; remplace les créneaux PlanSlot, supprimés) ----------
+interface TimeSession {
   id: ID;
-  date: LocalDate;             // jour courant par défaut ; champ présent pour ne pas figer le choix (AMB-13)
-  start: LocalTime;
-  end: LocalTime;              // > start, même jour (pas de passage minuit)
-  title: string;
-  taskId?: ID;                 // lien facultatif vers une tâche
+  taskId: ID;
+  start: EpochMs;
+  end?: EpochMs;               // absent = en cours. Table `timeSessions` (Dexie v2), pause = settings.pausedTaskId
 }
+// Services : timerService (start/pause/stop/resetDay), domain/time-sessions.ts (splitByDay, totalMs, dayMsByTask).
 
 // ---------- Réglages ----------
 interface Profile { displayName: string; }   // avatar par défaut, non stocké (AMB-19)
@@ -278,11 +277,10 @@ interface TaskService {
 }
 
 // ---- Plan du jour
-interface SlotInput { date: LocalDate; start: LocalTime; end: LocalTime; title: string; taskId?: ID; }
-interface PlanSlotService {
-  create(input: SlotInput): Promise<Result<PlanSlot & { overlaps: boolean }, SlotInput>>; // overlaps => avertissement (AMB-13)
-  update(id: ID, input: SlotInput): Promise<Result<PlanSlot & { overlaps: boolean }, SlotInput>>;
-  remove(id: ID): Promise<void>;
+interface TimerService {
+  start(taskId: ID): Promise<Result<{ id: ID }, { taskId: ID }>>; // clôt toute session ouverte
+  pause(): Promise<void>; stop(): Promise<void>;
+  resetDay(taskId: ID, date: LocalDate): Promise<void>;
 }
 
 // ---- Statistiques (fonctions pures, domain/stats.ts)

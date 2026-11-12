@@ -6,7 +6,7 @@ import {
   taskPatchSchema,
   validate,
 } from '@/domain/schemas';
-import { applyTaskRules, positionBetween } from '@/domain/task-rules';
+import { applyTaskRules, positionBetween, statusFromSubtasks, subtaskProgress } from '@/domain/task-rules';
 import type {
   ID,
   Reminder,
@@ -23,6 +23,30 @@ const byPosition = (a: { position: number }, b: { position: number }) => a.posit
 async function column(status: TaskStatus): Promise<Task[]> {
   const rows = await db.tasks.where('[status+position]').between([status, -Infinity], [status, Infinity]).toArray();
   return rows.sort(byPosition);
+}
+
+/** Recalcule la progression d'une tâche depuis ses sous-tâches (à appeler dans une transaction tasks+subtasks). Une tâche « done » reste à 100. */
+async function syncProgress(taskId: ID): Promise<TaskStatus | null> {
+  const t = await db.tasks.get(taskId);
+  if (!t) return null;
+  const subs = await db.subtasks.where('taskId').equals(taskId).toArray();
+  if (subs.length === 0) return null;
+  const progress = subtaskProgress(subs);
+  if (progress !== t.progress) await db.tasks.update(taskId, { progress, updatedAt: Date.now() });
+  const target = statusFromSubtasks(subs);
+  return target && target !== t.status ? target : null;
+}
+
+/** Après un changement de sous-tâche : met à jour la progression puis déplace la carte dans la colonne imposée. */
+async function applySubtaskRules(taskId: ID): Promise<void> {
+  const target = await db.transaction('rw', db.tasks, db.subtasks, () => syncProgress(taskId));
+  if (target) await taskService.move(taskId, target);
+}
+
+/** Clôt la session ouverte de la tâche (à appeler dans une transaction incluant timeSessions). */
+async function closeOpenSession(taskId: ID, now: number): Promise<void> {
+  await db.timeSessions.where('taskId').equals(taskId).filter((s) => s.end === undefined).modify({ end: now });
+  if ((await db.settings.get('pausedTaskId'))?.value === taskId) await db.settings.delete('pausedTaskId');
 }
 
 async function renumber(status: TaskStatus): Promise<void> {
@@ -78,7 +102,7 @@ export const taskService: TaskService & {
   async update(id, patch) {
     const p = validate(taskPatchSchema, patch);
     if (!p.ok) return p;
-    return db.transaction('rw', db.tasks, async () => {
+    return db.transaction('rw', db.tasks, db.timeSessions, db.settings, async () => {
       const current = await db.tasks.get(id);
       if (!current) return { ok: false as const, errors: { title: 'Tâche introuvable.' } };
       const merged: TaskInput = {
@@ -107,20 +131,20 @@ export const taskService: TaskService & {
         next.position = (col.length ? col[col.length - 1].position : 0) + 1;
       }
       await db.tasks.put(next);
+      if (next.status === 'done') await closeOpenSession(id, now);
       return { ok: true as const, value: next };
     });
   },
 
   async remove(id) {
-    await db.transaction('rw', [db.tasks, db.subtasks, db.comments, db.reminders, db.planSlots], async () => {
+    await db.transaction('rw', [db.tasks, db.subtasks, db.comments, db.reminders, db.timeSessions, db.settings], async () => {
       await db.subtasks.where('taskId').equals(id).delete();
       await db.comments.where('taskId').equals(id).delete();
       await db.reminders.where('taskId').equals(id).modify((r: Reminder) => {
         delete r.taskId;
       });
-      await db.planSlots.filter((s) => s.taskId === id).modify((s) => {
-        delete s.taskId;
-      });
+      await db.timeSessions.where('taskId').equals(id).delete();
+      if ((await db.settings.get('pausedTaskId'))?.value === id) await db.settings.delete('pausedTaskId');
       await db.tasks.delete(id);
     });
   },
@@ -130,7 +154,7 @@ export const taskService: TaskService & {
   },
 
   async move(id, status, beforeId) {
-    await db.transaction('rw', db.tasks, async () => {
+    await db.transaction('rw', db.tasks, db.timeSessions, db.settings, async () => {
       const task = await db.tasks.get(id);
       if (!task) return;
       const now = Date.now();
@@ -148,6 +172,7 @@ export const taskService: TaskService & {
       let next: Task = { ...task, status, position: position ?? 1, updatedAt: now };
       next = applyTaskRules(task, next, now);
       await db.tasks.put(next);
+      if (next.status === 'done') await closeOpenSession(id, now);
     });
   },
 
@@ -161,7 +186,7 @@ export const taskService: TaskService & {
   async addSubtask(taskId, title) {
     const v = validate(subtaskTitleSchema, { title });
     if (!v.ok) return v;
-    return db.transaction('rw', db.tasks, db.subtasks, async () => {
+    const res = await db.transaction('rw', db.tasks, db.subtasks, async () => {
       if (!(await db.tasks.get(taskId))) return { ok: false as const, errors: { title: 'Tâche introuvable.' } };
       const existing = await db.subtasks.where('taskId').equals(taskId).toArray();
       const sub: Subtask = {
@@ -174,6 +199,8 @@ export const taskService: TaskService & {
       await db.subtasks.add(sub);
       return { ok: true as const, value: sub };
     });
+    if (res.ok) await applySubtaskRules(taskId);
+    return res;
   },
 
   async renameSubtask(id, title) {
@@ -187,13 +214,17 @@ export const taskService: TaskService & {
   },
 
   async toggleSubtask(id) {
-    await db.subtasks.where('id').equals(id).modify((s) => {
-      s.done = !s.done;
-    });
+    const sub = await db.subtasks.get(id);
+    if (!sub) return;
+    await db.subtasks.update(id, { done: !sub.done });
+    await applySubtaskRules(sub.taskId);
   },
 
   async removeSubtask(id) {
+    const sub = await db.subtasks.get(id);
+    if (!sub) return;
     await db.subtasks.delete(id);
+    await applySubtaskRules(sub.taskId);
   },
 
   async addComment(taskId, text) {

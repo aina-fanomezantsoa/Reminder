@@ -30,8 +30,9 @@ export const completedPerDay: CompletedPerDay = (tasks, days, today) => {
   const n = Math.max(0, Math.floor(days));
   const counts = new Map<string, number>();
   for (const t of tasks) {
-    if (t.status !== 'done' || t.completedAt == null) continue;
-    const d = formatLocalDate(new Date(t.completedAt));
+    if (t.status !== 'done') continue;
+    // Repli sur updatedAt pour une tâche « done » sans date de fin (données anciennes ou importées).
+    const d = formatLocalDate(new Date(t.completedAt ?? t.updatedAt));
     counts.set(d, (counts.get(d) ?? 0) + 1);
   }
   const out: BarDatum[] = [];

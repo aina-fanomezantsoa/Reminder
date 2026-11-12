@@ -5,7 +5,9 @@ import { AlertCircle, Check, Circle, Plus, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { ACCENT_CLASSES, taskAccent } from '@/lib/accent';
 import type { ID, Result, Subtask } from '@/domain/types';
+import { subtaskProgress } from '@/domain/task-rules';
 import { IconButton } from '@/components/ui/IconButton';
+import { ProgressBar } from '@/components/ui/ProgressBar';
 import { controlClass } from '@/components/ui/Field';
 
 type TitleResult = Result<Subtask, { title: string }>;
@@ -56,6 +58,9 @@ export function SubtaskList({ taskId, subtasks, onAdd, onRename, onToggle, onRem
   return (
     <div className="flex flex-col gap-2">
       {subtasks.length === 0 && <p className="text-sm text-subtle">Aucune sous-tâche.</p>}
+      {subtasks.length > 0 && (
+        <ProgressBar value={subtaskProgress(subtasks)} accent={taskAccent(taskId)} showLabel label="Avancement des sous-tâches" />
+      )}
       <ul className="flex flex-col gap-2">
         {subtasks.map((s) => (
           <li key={s.id} className={cn('flex items-center gap-1 rounded-xl border-l-4 bg-canvas pr-1', accent.border)}>

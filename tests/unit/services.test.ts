@@ -1,10 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '@/data/db';
 import { taskService } from '@/data/services/tasks';
-import { planSlotService } from '@/data/services/plan-slots';
 import { applyTaskRules, positionBetween } from '@/domain/task-rules';
-import { findOverlaps, slotsOverlap } from '@/domain/slots';
-import { slotInputSchema, taskInputSchema, validate } from '@/domain/schemas';
+import { taskInputSchema, validate } from '@/domain/schemas';
 import type { Reminder, Task } from '@/domain/types';
 
 beforeEach(async () => {
@@ -29,12 +27,6 @@ describe('schémas', () => {
   it('progression entier 0..100', () => {
     for (const p of [-1, 101, 5.5]) expect(validate(taskInputSchema, { ...input, progress: p }).ok).toBe(false);
     expect(validate(taskInputSchema, { ...input, progress: 100 }).ok).toBe(true);
-  });
-  it('créneau : fin > début, format HH:mm', () => {
-    const s = { date: '2026-05-01', start: '10:00', end: '10:00', title: 'x' };
-    expect(validate(slotInputSchema, s)).toMatchObject({ ok: false, errors: { end: expect.any(String) } });
-    expect(validate(slotInputSchema, { ...s, start: '25:00' }).ok).toBe(false);
-    expect(validate(slotInputSchema, { ...s, end: '10:01' }).ok).toBe(true);
   });
 });
 
@@ -125,7 +117,39 @@ describe('service tâches', () => {
     await taskService.toggleStar(t.id);
     expect((await taskService.get(t.id))?.starred).toBe(false);
   });
-  it('sous-tâches : ajout, validation, rename, toggle, suppression, ne change pas la progression', async () => {
+  it('sous-tâches : la progression suit les sous-tâches cochées', async () => {
+    const t = await mk({ progress: 20 });
+    const a = await taskService.addSubtask(t.id, 'A');
+    const b = await taskService.addSubtask(t.id, 'B');
+    if (!a.ok || !b.ok) throw new Error();
+    expect((await taskService.get(t.id))?.progress).toBe(0);
+    await taskService.toggleSubtask(a.value.id);
+    expect(await taskService.get(t.id)).toMatchObject({ progress: 50, status: 'in_progress' });
+    await taskService.toggleSubtask(b.value.id);
+    expect(await taskService.get(t.id)).toMatchObject({ progress: 100, status: 'done', completedAt: expect.any(Number) });
+    await taskService.removeSubtask(b.value.id);
+    expect((await taskService.get(t.id))?.progress).toBe(100);
+  });
+  it('sous-tâches : 1 cochée → en cours, 2 cochées → édition, toutes → terminée, décocher recule', async () => {
+    const t = await mk();
+    const ids: string[] = [];
+    for (const n of ['A', 'B', 'C', 'D']) {
+      const r = await taskService.addSubtask(t.id, n);
+      if (!r.ok) throw new Error();
+      ids.push(r.value.id);
+    }
+    const status = async () => (await taskService.get(t.id))?.status;
+    await taskService.toggleSubtask(ids[0]);
+    expect(await status()).toBe('in_progress');
+    await taskService.toggleSubtask(ids[1]);
+    expect(await status()).toBe('editing');
+    await taskService.toggleSubtask(ids[2]);
+    await taskService.toggleSubtask(ids[3]);
+    expect(await status()).toBe('done');
+    await taskService.toggleSubtask(ids[3]);
+    expect(await taskService.get(t.id)).toMatchObject({ status: 'editing', progress: 75 });
+  });
+  it('sous-tâches : ajout, validation, rename, toggle, suppression', async () => {
     const t = await mk({ progress: 20 });
     expect(await taskService.addSubtask(t.id, '  ')).toMatchObject({ ok: false, errors: { title: expect.any(String) } });
     const s1 = await taskService.addSubtask(t.id, 'Un');
@@ -138,7 +162,6 @@ describe('service tâches', () => {
     expect(await taskService.renameSubtask(s1.value.id, '')).toMatchObject({ ok: false });
     await taskService.removeSubtask(s2.value.id);
     expect(await taskService.subtasksOf(t.id)).toHaveLength(1);
-    expect((await taskService.get(t.id))?.progress).toBe(20);
     expect((await taskService.addSubtask('nope', 'x')).ok).toBe(false);
   });
   it('commentaires', async () => {
@@ -147,14 +170,12 @@ describe('service tâches', () => {
     expect((await taskService.addComment(t.id, 'Bonjour')).ok).toBe(true);
     expect(await taskService.commentsOf(t.id)).toHaveLength(1);
   });
-  it('remove : cascade, rappels et créneaux détachés mais conservés', async () => {
+  it('remove : cascade, rappels détachés mais conservés', async () => {
     const t = await mk();
     await taskService.addSubtask(t.id, 's');
     await taskService.addComment(t.id, 'c');
     const rem: Reminder = { id: 'r1', title: 'R', startDate: '2026-05-01', time: '09:00', recurrence: 'none', taskId: t.id, nextDueAt: 1, createdAt: 1, updatedAt: 1 };
     await db.reminders.add(rem);
-    const slot = await planSlotService.create({ date: '2026-05-01', start: '09:00', end: '10:00', title: 'Slot', taskId: t.id });
-    expect(slot.ok).toBe(true);
     expect(await taskService.remindersOf(t.id)).toHaveLength(1);
     await taskService.remove(t.id);
     expect(await db.tasks.count()).toBe(0);
@@ -163,54 +184,5 @@ describe('service tâches', () => {
     const r = await db.reminders.get('r1');
     expect(r).toBeDefined();
     expect(r?.taskId).toBeUndefined();
-    const s = (await db.planSlots.toArray())[0];
-    expect(s.title).toBe('Slot');
-    expect(s.taskId).toBeUndefined();
-  });
-});
-
-describe('créneaux : chevauchement', () => {
-  const s = (start: string, end: string, date = '2026-05-01') => ({ date, start, end });
-  it('slotsOverlap : intersection stricte, bornes jointives OK, jours différents OK', () => {
-    expect(slotsOverlap(s('09:00', '10:00'), s('09:30', '10:30'))).toBe(true);
-    expect(slotsOverlap(s('09:00', '12:00'), s('10:00', '11:00'))).toBe(true);
-    expect(slotsOverlap(s('09:00', '10:00'), s('10:00', '11:00'))).toBe(false);
-    expect(slotsOverlap(s('09:00', '10:00'), s('08:00', '09:00'))).toBe(false);
-    expect(slotsOverlap(s('09:00', '10:00'), s('09:00', '10:00', '2026-05-02'))).toBe(false);
-  });
-  it('findOverlaps ignore le créneau modifié', () => {
-    const ex = [{ id: 'a', title: 'a', ...s('09:00', '10:00') }];
-    expect(findOverlaps(ex, { ...s('09:15', '09:45'), title: 'n' })).toHaveLength(1);
-    expect(findOverlaps(ex, { ...s('09:15', '09:45'), title: 'n' }, 'a')).toHaveLength(0);
-  });
-  it('service : overlaps = true (avertissement, pas d\'erreur), 2e jour libre', async () => {
-    const a = await planSlotService.create({ ...s('09:00', '10:00'), title: 'A' });
-    expect(a).toMatchObject({ ok: true, value: { overlaps: false } });
-    const b = await planSlotService.create({ ...s('09:30', '10:30'), title: 'B' });
-    expect(b).toMatchObject({ ok: true, value: { overlaps: true } });
-    const c = await planSlotService.create({ ...s('10:30', '11:00'), title: 'C' });
-    expect(c).toMatchObject({ ok: true, value: { overlaps: false } });
-    const d = await planSlotService.create({ ...s('09:30', '10:30', '2026-05-02'), title: 'D' });
-    expect(d).toMatchObject({ ok: true, value: { overlaps: false } });
-    expect(await db.planSlots.count()).toBe(4);
-  });
-  it('update : ne se chevauche pas avec lui-même ; chevauchement détecté après déplacement', async () => {
-    const a = await planSlotService.create({ ...s('09:00', '10:00'), title: 'A' });
-    const b = await planSlotService.create({ ...s('11:00', '12:00'), title: 'B' });
-    if (!a.ok || !b.ok) throw new Error();
-    expect(await planSlotService.update(a.value.id, { ...s('09:15', '09:45'), title: 'A' })).toMatchObject({ ok: true, value: { overlaps: false } });
-    expect(await planSlotService.update(a.value.id, { ...s('11:30', '11:45'), title: 'A' })).toMatchObject({ ok: true, value: { overlaps: true } });
-    expect((await planSlotService.update('nope', { ...s('09:00', '10:00'), title: 'x' })).ok).toBe(false);
-  });
-  it('validation : fin <= début refusée, tâche inexistante refusée', async () => {
-    expect(await planSlotService.create({ ...s('10:00', '09:00'), title: 'x' })).toMatchObject({ ok: false, errors: { end: expect.any(String) } });
-    expect(await planSlotService.create({ ...s('09:00', '10:00'), title: 'x', taskId: 'nope' })).toMatchObject({ ok: false, errors: { taskId: expect.any(String) } });
-  });
-  it('listByDate trié par heure ; remove', async () => {
-    await planSlotService.create({ ...s('14:00', '15:00'), title: 'tard' });
-    const early = await planSlotService.create({ ...s('08:00', '09:00'), title: 'tôt' });
-    expect((await planSlotService.listByDate('2026-05-01')).map((x) => x.title)).toEqual(['tôt', 'tard']);
-    if (early.ok) await planSlotService.remove(early.value.id);
-    expect(await planSlotService.listByDate('2026-05-01')).toHaveLength(1);
   });
 });

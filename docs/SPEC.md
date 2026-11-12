@@ -199,14 +199,15 @@ En tant qu'utilisateur, je veux voir mes tâches et rappels dans un calendrier, 
 - CL : jour avec beaucoup d'éléments ("+ n autres") ; changement d'année ; mois à 28/29/30/31 jours.
 
 ### US-P3 (Must) Plan du jour
-En tant qu'utilisateur, je veux planifier ma journée par créneaux horaires, afin de savoir quoi faire à quelle heure.
+MISE À JOUR : les créneaux horaires (planSlots, SlotForm) sont remplacés par un chronomètre par sessions (table `timeSessions`, `services/timer.ts`, `domain/time-sessions.ts`).
 
-- CA-P3.1 : Le panneau affiche les créneaux du jour sous la forme "HH:MM - HH:MM" (ex. 12:00 - 13:00), triés par heure de début.
-- CA-P3.2 : L'utilisateur peut ajouter, modifier et supprimer un créneau (titre, heure de début, heure de fin). [AMB-13]
-- CA-P3.3 : L'heure de fin doit être postérieure à l'heure de début ; sinon erreur explicite.
-- CA-P3.4 : Les créneaux d'un jour donné sont conservés après rechargement. Le panneau affiche le jour courant par défaut.
-- [AMB-13] Un créneau est-il rattaché à une tâche (les pastilles A/B/C de la maquette) ou libre ? Hypothèse : un créneau peut référencer une tâche existante ou porter un titre libre. Peut-on planifier un autre jour que le jour courant ? Les créneaux se répètent-ils ?
-- CL : créneaux qui se chevauchent (autoriser avec avertissement ? AMB-13) ; créneau traversant minuit (refusé en MVP, à confirmer) ; aucun créneau (état vide) ; tâche liée supprimée.
+En tant qu'utilisateur, je veux chronométrer le temps passé sur mes tâches, afin de savoir combien de temps j'y ai consacré aujourd'hui.
+
+- CA-P3.1 : Une seule tâche chronométrée à la fois : démarrer, mettre en pause, reprendre, arrêter. Le temps du jour s'affiche sur la carte tâche et le titre d'onglet.
+- CA-P3.2 : Une session est `{taskId, start, end?}` ; `end` absent = en cours. Le temps est découpé par jour local (session à cheval sur minuit).
+- CA-P3.3 : Passer une tâche à « terminée » clôt sa session ouverte et efface sa pause ; supprimer une tâche supprime ses sessions.
+- CA-P3.4 : Remise à zéro du jour : retire la part du jour choisi des sessions d'une tâche (rogne celles qui chevauchent minuit). Sessions et pause sont conservées au rechargement et dans les sauvegardes (les sauvegardes v1 sans `timeSessions` restent importables).
+- CL : session ouverte depuis la veille ou > 12 h : bandeau « Garder / Arrêter ».
 
 ---
 

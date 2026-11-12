@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isValidLocalDate, isValidLocalTime, timeToMinutes } from './dates';
+import { isValidLocalDate, isValidLocalTime } from './dates';
 
 const title = z
   .string({ error: 'Le titre est obligatoire.' })
@@ -66,20 +66,6 @@ export const commentSchema = z.object({
     .min(1, 'Le commentaire est obligatoire.')
     .max(2000, 'Le commentaire ne doit pas dépasser 2000 caractères.'),
 });
-
-// ---------- Créneaux ----------
-export const slotInputSchema = z
-  .object({
-    date: localDate('Date invalide.'),
-    start: localTime("Heure de début invalide (format HH:mm)."),
-    end: localTime('Heure de fin invalide (format HH:mm).'),
-    title,
-    taskId: optionalId,
-  })
-  .refine(
-    (s) => !isValidLocalTime(s.start) || !isValidLocalTime(s.end) || timeToMinutes(s.end) > timeToMinutes(s.start),
-    { message: "L'heure de fin doit être après l'heure de début.", path: ['end'] },
-  );
 
 // ---------- Utilitaire de validation -> Result ----------
 export function validate<S extends z.ZodType>(
