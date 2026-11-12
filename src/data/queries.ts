@@ -3,18 +3,7 @@ import { db } from './db';
 import { formatLocalDate, parseLocalDate } from '@/domain/dates';
 import { reminderService } from './services/reminders';
 import { TASK_STATUSES } from '@/domain/types';
-import type {
-  ID,
-  LocalDate,
-  Reminder,
-  ReminderEvent,
-  ReminderOccurrence,
-  Subtask,
-  Task,
-  TaskBoard,
-  TaskCardData,
-  TaskComment,
-} from '@/domain/types';
+import type { ID, LocalDate, Reminder, ReminderEvent, ReminderOccurrence, Subtask, Task, TaskBoard, TaskCardData, TaskComment } from '@/domain/types';
 
 /**
  * Lecteurs purs (sans React) derrière les hooks de `hooks.ts` : testables sans navigateur.
@@ -24,11 +13,7 @@ import type {
 const byPosition = (a: { position: number }, b: { position: number }) => a.position - b.position;
 
 /** Assemble les cartes : sous-tâches triées, compteurs dérivés (jamais stockés). Pièces jointes : table absente en v1 => 0. */
-export function buildTaskCards(
-  tasks: Task[],
-  subtasks: Subtask[],
-  comments: Pick<TaskComment, 'taskId'>[],
-): TaskCardData[] {
+export function buildTaskCards(tasks: Task[], subtasks: Subtask[], comments: Pick<TaskComment, 'taskId'>[]): TaskCardData[] {
   const subsBy = new Map<ID, Subtask[]>();
   for (const s of subtasks) {
     const l = subsBy.get(s.taskId);
@@ -72,10 +57,7 @@ export async function loadTasks(): Promise<Task[]> {
 export async function loadTask(id: ID): Promise<TaskCardData | null> {
   const t = await db.tasks.get(id);
   if (!t) return null;
-  const [subs, commentCount] = await Promise.all([
-    db.subtasks.where('taskId').equals(id).toArray(),
-    db.comments.where('taskId').equals(id).count(),
-  ]);
+  const [subs, commentCount] = await Promise.all([db.subtasks.where('taskId').equals(id).toArray(), db.comments.where('taskId').equals(id).count()]);
   return { ...t, subtasks: subs.sort(byPosition), commentCount, attachmentCount: 0 };
 }
 
@@ -98,14 +80,9 @@ export interface ReminderLists {
 }
 
 export async function loadReminderLists(): Promise<ReminderLists> {
-  const [all, missed] = await Promise.all([
-    db.reminders.toArray(),
-    db.reminderEvents.where('status').equals('missed').toArray(),
-  ]);
+  const [all, missed] = await Promise.all([db.reminders.toArray(), db.reminderEvents.where('status').equals('missed').toArray()]);
   const upcoming = all.filter((r) => r.nextDueAt !== null).sort((a, b) => (a.nextDueAt as number) - (b.nextDueAt as number));
-  const past = all
-    .filter((r) => r.nextDueAt === null)
-    .sort((a, b) => (b.startDate + b.time).localeCompare(a.startDate + a.time));
+  const past = all.filter((r) => r.nextDueAt === null).sort((a, b) => (b.startDate + b.time).localeCompare(a.startDate + a.time));
   return { upcoming, past, missed: missed.filter((e) => !e.acknowledged).sort((a, b) => b.dueAt - a.dueAt) };
 }
 
@@ -116,12 +93,14 @@ export function calendarGridRange(monthStart: LocalDate): { from: LocalDate; to:
   return { from: formatLocalDate(gridStart), to: formatLocalDate(addDays(gridStart, 41)) };
 }
 
-export async function loadCalendarEntries(
-  monthStart: LocalDate,
-): Promise<{ tasks: Task[]; reminders: ReminderOccurrence[] }> {
+export async function loadCalendarEntries(monthStart: LocalDate): Promise<{ tasks: Task[]; reminders: ReminderOccurrence[] }> {
   const { from, to } = calendarGridRange(monthStart);
-  const tasks = (await db.tasks.where('startDate').belowOrEqual(to).filter((t) => t.endDate >= from).toArray()).sort(
-    (a, b) => a.startDate.localeCompare(b.startDate) || a.endDate.localeCompare(b.endDate),
-  );
+  const tasks = (
+    await db.tasks
+      .where('startDate')
+      .belowOrEqual(to)
+      .filter((t) => t.endDate >= from)
+      .toArray()
+  ).sort((a, b) => a.startDate.localeCompare(b.startDate) || a.endDate.localeCompare(b.endDate));
   return { tasks, reminders: await reminderService.occurrencesBetween(from, to) };
 }

@@ -115,7 +115,7 @@ describe('calculs purs', () => {
       { date: D2, ms: 60 * MIN },
     ]);
   });
-  it('session ouverte jusqu\'à now ; end < start borné à 0', () => {
+  it("session ouverte jusqu'à now ; end < start borné à 0", () => {
     expect(splitByDay(sess('a', at(D1, '10:00')), at(D1, '10:05'))).toEqual([{ date: D1, ms: 5 * MIN }]);
     expect(splitByDay(sess('a', 100, 50), 0)).toEqual([]);
     expect(totalMs([sess('a', 100, 50)], 0)).toBe(0);
@@ -124,7 +124,12 @@ describe('calculs purs', () => {
     const l = [sess('a', at(D1, '23:00'), at(D2, '01:00')), sess('a', at(D2, '10:00'), at(D2, '10:30')), sess('b', at(D2, '11:00'))];
     const now = at(D2, '11:10');
     expect(totalMs(l, now)).toBe((120 + 30 + 10) * MIN);
-    expect(dayMsByTask(l, D2, now)).toEqual(new Map([['a', 90 * MIN], ['b', 10 * MIN]]));
+    expect(dayMsByTask(l, D2, now)).toEqual(
+      new Map([
+        ['a', 90 * MIN],
+        ['b', 10 * MIN],
+      ]),
+    );
     expect(dayMsByTask(l, D1, now)).toEqual(new Map([['a', 60 * MIN]]));
   });
   it('formatDuration', () => {
@@ -147,7 +152,7 @@ describe('resetDay', () => {
     const rest = await db.timeSessions.where('taskId').equals('a').toArray();
     expect(dayMsByTask(rest, D1, 0).get('a')).toBeUndefined();
     expect(dayMsByTask(rest, D2, 0).get('a')).toBe(120 * MIN); // 01:00 rognée + 09:00-10:00 intacte
-    expect((await db.timeSessions.where('taskId').equals('b').toArray())).toHaveLength(1);
+    expect(await db.timeSessions.where('taskId').equals('b').toArray()).toHaveLength(1);
   });
 });
 

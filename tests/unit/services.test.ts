@@ -21,7 +21,10 @@ describe('schémas', () => {
     expect(validate(taskInputSchema, { ...input, title: '   ' })).toMatchObject({ ok: false, errors: { title: expect.any(String) } });
     expect(validate(taskInputSchema, { ...input, title: 'x'.repeat(201) }).ok).toBe(false);
     expect(validate(taskInputSchema, { title: 'a' })).toMatchObject({ ok: false, errors: { startDate: expect.any(String), endDate: expect.any(String) } });
-    expect(validate(taskInputSchema, { ...input, endDate: '2026-04-30' })).toMatchObject({ ok: false, errors: { endDate: expect.stringContaining('précéder') } });
+    expect(validate(taskInputSchema, { ...input, endDate: '2026-04-30' })).toMatchObject({
+      ok: false,
+      errors: { endDate: expect.stringContaining('précéder') },
+    });
     expect(validate(taskInputSchema, { ...input, startDate: '2026-02-30' }).ok).toBe(false);
   });
   it('progression entier 0..100', () => {
@@ -31,7 +34,18 @@ describe('schémas', () => {
 });
 
 describe('task-rules', () => {
-  const base: Task = { id: 'a', title: 't', status: 'in_progress', progress: 40, starred: false, startDate: '2026-01-01', endDate: '2026-01-02', position: 1, createdAt: 1, updatedAt: 1 };
+  const base: Task = {
+    id: 'a',
+    title: 't',
+    status: 'in_progress',
+    progress: 40,
+    starred: false,
+    startDate: '2026-01-01',
+    endDate: '2026-01-02',
+    position: 1,
+    createdAt: 1,
+    updatedAt: 1,
+  };
   it('done => 100 % + completedAt ; quitter done retire completedAt et garde la progression', () => {
     const done = applyTaskRules(base, { ...base, status: 'done' }, 500);
     expect(done).toMatchObject({ progress: 100, completedAt: 500 });
@@ -70,13 +84,13 @@ describe('service tâches', () => {
     expect(r2.ok && r2.value.completedAt).toBeUndefined();
     expect(r2.ok && r2.value.progress).toBe(100);
   });
-  it('update : valide la cohérence des dates sur l\'objet fusionné', async () => {
+  it("update : valide la cohérence des dates sur l'objet fusionné", async () => {
     const t = await mk();
     expect(await taskService.update(t.id, { endDate: '2026-04-01' })).toMatchObject({ ok: false, errors: { endDate: expect.any(String) } });
     expect(await taskService.update(t.id, { progress: 120 })).toMatchObject({ ok: false });
     expect((await taskService.get(t.id))?.endDate).toBe('2026-05-10');
   });
-  it('update inconnu => erreur, pas d\'exception', async () => {
+  it("update inconnu => erreur, pas d'exception", async () => {
     expect((await taskService.update('nope', { title: 'x' })).ok).toBe(false);
   });
   it('move : changement de colonne et réordonnancement', async () => {
@@ -100,7 +114,7 @@ describe('service tâches', () => {
     await taskService.move(a.id, 'done');
     expect(await taskService.get(a.id)).toMatchObject({ status: 'done', progress: 100, completedAt: expect.any(Number) });
   });
-  it('move : rééquilibre quand l\'écart de positions est épuisé', async () => {
+  it("move : rééquilibre quand l'écart de positions est épuisé", async () => {
     const a = await mk({ title: 'A' });
     const b = await mk({ title: 'B' });
     await db.tasks.update(a.id, { position: 1 });
@@ -174,7 +188,17 @@ describe('service tâches', () => {
     const t = await mk();
     await taskService.addSubtask(t.id, 's');
     await taskService.addComment(t.id, 'c');
-    const rem: Reminder = { id: 'r1', title: 'R', startDate: '2026-05-01', time: '09:00', recurrence: 'none', taskId: t.id, nextDueAt: 1, createdAt: 1, updatedAt: 1 };
+    const rem: Reminder = {
+      id: 'r1',
+      title: 'R',
+      startDate: '2026-05-01',
+      time: '09:00',
+      recurrence: 'none',
+      taskId: t.id,
+      nextDueAt: 1,
+      createdAt: 1,
+      updatedAt: 1,
+    };
     await db.reminders.add(rem);
     expect(await taskService.remindersOf(t.id)).toHaveLength(1);
     await taskService.remove(t.id);

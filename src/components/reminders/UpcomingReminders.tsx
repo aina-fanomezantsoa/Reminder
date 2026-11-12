@@ -56,7 +56,10 @@ export function UpcomingReminders({ limit = 3 }: { limit?: number }) {
           ))}
         </ul>
       )}
-      <Link href="/reminders" className="rounded text-sm font-medium text-brand underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
+      <Link
+        href="/reminders"
+        className="rounded text-sm font-medium text-brand underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+      >
         Tous les rappels
       </Link>
     </>

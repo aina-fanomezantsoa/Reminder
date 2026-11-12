@@ -40,7 +40,8 @@ export function NotificationBanner({ permission, onRequest }: NotificationBanner
             Les notifications sont bloquées
           </h2>
           <p className="text-sm">
-            Vos rappels s&apos;afficheront ici, dans l&apos;application, mais vous ne recevrez pas d&apos;alerte système. Pour les réactiver, autorisez les notifications pour ce site dans les réglages de votre navigateur (icône de cadenas dans la barre d&apos;adresse).
+            Vos rappels s&apos;afficheront ici, dans l&apos;application, mais vous ne recevrez pas d&apos;alerte système. Pour les réactiver, autorisez les
+            notifications pour ce site dans les réglages de votre navigateur (icône de cadenas dans la barre d&apos;adresse).
           </p>
           <button
             type="button"

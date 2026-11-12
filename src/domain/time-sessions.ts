@@ -18,8 +18,7 @@ export function splitByDay(session: TimeSession, now: EpochMs): { date: LocalDat
   return out;
 }
 
-export const totalMs = (sessions: TimeSession[], now: EpochMs): number =>
-  sessions.reduce((sum, s) => sum + Math.max(0, (s.end ?? now) - s.start), 0);
+export const totalMs = (sessions: TimeSession[], now: EpochMs): number => sessions.reduce((sum, s) => sum + Math.max(0, (s.end ?? now) - s.start), 0);
 
 export function dayMsByTask(sessions: TimeSession[], date: LocalDate, now: EpochMs): Map<ID, number> {
   const m = new Map<ID, number>();

@@ -46,9 +46,7 @@ function recurrenceHelp(recurrence: Recurrence, date: string, time: string): str
   if (recurrence === 'daily') return `Tous les jours à ${time}`;
   if (recurrence === 'weekly') return `Chaque ${format(d, 'EEEE', { locale: fr })} à ${time}`;
   const day = d.getDate();
-  return day > 28
-    ? `Le ${day} de chaque mois (le dernier jour des mois plus courts), à ${time}`
-    : `Le ${day === 1 ? '1er' : day} de chaque mois à ${time}`;
+  return day > 28 ? `Le ${day} de chaque mois (le dernier jour des mois plus courts), à ${time}` : `Le ${day === 1 ? '1er' : day} de chaque mois à ${time}`;
 }
 
 export function ReminderForm({ initial: liveInitial, defaultTaskId, defaultDate, tasks, onSubmit, onDelete, onClose }: ReminderFormProps) {
@@ -159,8 +157,21 @@ export function ReminderForm({ initial: liveInitial, defaultTaskId, defaultDate,
             </p>
           )}
 
-          <Field label="Titre" htmlFor={fid('title')} required error={errors.title} hint={title.length >= 180 ? `${title.length} / ${MAX_TITLE} caractères` : undefined}>
-            <input type="text" value={title} data-autofocus autoComplete="off" onChange={(e) => setTitle(e.target.value)} className={controlClass(Boolean(errors.title))} />
+          <Field
+            label="Titre"
+            htmlFor={fid('title')}
+            required
+            error={errors.title}
+            hint={title.length >= 180 ? `${title.length} / ${MAX_TITLE} caractères` : undefined}
+          >
+            <input
+              type="text"
+              value={title}
+              data-autofocus
+              autoComplete="off"
+              onChange={(e) => setTitle(e.target.value)}
+              className={controlClass(Boolean(errors.title))}
+            />
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">

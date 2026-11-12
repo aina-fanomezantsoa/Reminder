@@ -13,13 +13,17 @@ export function taskAccent(id: string): AccentName {
 }
 
 /** Classes statiques par accent. `onStrong` : texte lisible sur la couleur forte (encre sur ambre). */
-export const ACCENT_CLASSES: Record<
-  AccentName,
-  { strong: string; soft: string; ink: string; onStrong: string; border: string; softBg50: string }
-> = {
+export const ACCENT_CLASSES: Record<AccentName, { strong: string; soft: string; ink: string; onStrong: string; border: string; softBg50: string }> = {
   ocean: { strong: 'bg-ocean', soft: 'bg-ocean-soft', ink: 'text-ocean-ink', onStrong: 'text-white', border: 'border-ocean', softBg50: 'bg-ocean-soft/50' },
   grape: { strong: 'bg-grape', soft: 'bg-grape-soft', ink: 'text-grape-ink', onStrong: 'text-white', border: 'border-grape', softBg50: 'bg-grape-soft/50' },
-  orchid: { strong: 'bg-orchid', soft: 'bg-orchid-soft', ink: 'text-orchid-ink', onStrong: 'text-white', border: 'border-orchid', softBg50: 'bg-orchid-soft/50' },
+  orchid: {
+    strong: 'bg-orchid',
+    soft: 'bg-orchid-soft',
+    ink: 'text-orchid-ink',
+    onStrong: 'text-white',
+    border: 'border-orchid',
+    softBg50: 'bg-orchid-soft/50',
+  },
   sun: { strong: 'bg-sun', soft: 'bg-sun-soft', ink: 'text-sun-ink', onStrong: 'text-sun-ink', border: 'border-sun', softBg50: 'bg-sun-soft/50' },
 };
 

@@ -121,8 +121,8 @@ export function ReminderEditorProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const deleting = deleteId ? all.find((r) => r.id === deleteId) ?? (editingId === deleteId ? loaded ?? undefined : undefined) : undefined;
-  const editing = editingLive ?? (loaded ?? undefined);
+  const deleting = deleteId ? (all.find((r) => r.id === deleteId) ?? (editingId === deleteId ? (loaded ?? undefined) : undefined)) : undefined;
+  const editing = editingLive ?? loaded ?? undefined;
 
   return (
     <Ctx.Provider value={api}>

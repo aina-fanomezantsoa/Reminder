@@ -16,13 +16,11 @@ export const computeRings: ComputeRings = (tasks, limit) => {
     if (star !== 0) return star;
     return b.updatedAt - a.updatedAt;
   });
-  return sorted.slice(0, Math.floor(limit)).map(
-    (t): RingMetric => ({
-      taskId: t.id,
-      label: t.title,
-      percent: Math.min(100, Math.max(0, Math.round(t.progress))),
-    }),
-  );
+  return sorted.slice(0, Math.floor(limit)).map((t): RingMetric => ({
+    taskId: t.id,
+    label: t.title,
+    percent: Math.min(100, Math.max(0, Math.round(t.progress))),
+  }));
 };
 
 /** `days` jours consécutifs finissant à `today` (le plus ancien en premier), comptés d'après `completedAt`. */

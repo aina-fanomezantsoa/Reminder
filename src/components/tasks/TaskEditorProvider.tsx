@@ -85,7 +85,15 @@ export function TaskEditorProvider({ children }: { children: ReactNode }) {
         <TaskForm key="create" mode="create" defaultStatus={editor.defaultStatus} defaultDate={editor.date} onSubmit={submit} onClose={() => setEditor(null)} />
       )}
       {editor?.mode === 'edit' && editing && (
-        <TaskForm key={editor.id} mode="edit" initial={editing} onSubmit={submit} onDelete={api.requestDelete} onAddReminder={(taskId) => reminders.openCreate({ taskId })} onClose={() => setEditor(null)} />
+        <TaskForm
+          key={editor.id}
+          mode="edit"
+          initial={editing}
+          onSubmit={submit}
+          onDelete={api.requestDelete}
+          onAddReminder={(taskId) => reminders.openCreate({ taskId })}
+          onClose={() => setEditor(null)}
+        />
       )}
       <DeleteDialog task={deleting} onCancel={() => setDeleteId(null)} onConfirm={() => void confirmDelete()} />
     </Ctx.Provider>

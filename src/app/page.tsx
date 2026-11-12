@@ -42,7 +42,9 @@ export default function DashboardPage() {
             <h2 id="welcome" className="font-display text-xl font-semibold text-ink">
               Bienvenue dans Reminder
             </h2>
-            <p className="max-w-xl text-sm text-body">Créez une tâche pour suivre son avancement, ou un rappel pour être prévenu à l&apos;heure dite. Vos données restent sur cet appareil.</p>
+            <p className="max-w-xl text-sm text-body">
+              Créez une tâche pour suivre son avancement, ou un rappel pour être prévenu à l&apos;heure dite. Vos données restent sur cet appareil.
+            </p>
             <div className="flex flex-wrap gap-3">
               <Button leftIcon={<ClipboardList className="size-4" aria-hidden />} onClick={() => editor.openCreate()}>
                 Créer ma première tâche
@@ -59,7 +61,14 @@ export default function DashboardPage() {
             Efficacité
           </h2>
           {dash ? (
-            <EfficiencyRings rings={dash.rings} size="lg" limit={8} totalTasks={dash.totalTasks} onSelect={editor.openEdit} onCreate={() => editor.openCreate()} />
+            <EfficiencyRings
+              rings={dash.rings}
+              size="lg"
+              limit={8}
+              totalTasks={dash.totalTasks}
+              onSelect={editor.openEdit}
+              onCreate={() => editor.openCreate()}
+            />
           ) : (
             <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
               {Array.from({ length: 8 }, (_, i) => (
@@ -75,13 +84,13 @@ export default function DashboardPage() {
               <h2 id="dash-done" className="font-display text-base font-semibold text-ink">
                 Tâches terminées
               </h2>
-              {dash && (
-                <p className="text-xs font-medium text-subtle">
-                  7 derniers jours · {dash.completed.reduce((s, d) => s + d.count, 0)} au total
-                </p>
-              )}
+              {dash && <p className="text-xs font-medium text-subtle">7 derniers jours · {dash.completed.reduce((s, d) => s + d.count, 0)} au total</p>}
             </div>
-            {dash ? <CompletedHistogram data={dash.completed} size="lg" today={today || dash.completed[dash.completed.length - 1]?.date} /> : <Skeleton variant="card" className="h-64" />}
+            {dash ? (
+              <CompletedHistogram data={dash.completed} size="lg" today={today || dash.completed[dash.completed.length - 1]?.date} />
+            ) : (
+              <Skeleton variant="card" className="h-64" />
+            )}
           </section>
 
           <section aria-labelledby="dash-reminders" className="rounded-2xl bg-surface p-5 shadow-card">

@@ -17,11 +17,7 @@ const PROFILE_KEY = 'profile';
 const PROMPT_KEY = 'notificationPrompt';
 
 const profileSchema = z.object({
-  displayName: z
-    .string({ error: 'Le nom est obligatoire.' })
-    .trim()
-    .min(1, 'Le nom est obligatoire.')
-    .max(60, 'Le nom ne doit pas dépasser 60 caractères.'),
+  displayName: z.string({ error: 'Le nom est obligatoire.' }).trim().min(1, 'Le nom est obligatoire.').max(60, 'Le nom ne doit pas dépasser 60 caractères.'),
 });
 
 export const settingsService = {

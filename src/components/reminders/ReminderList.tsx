@@ -30,10 +30,7 @@ function DateBlock({ date, muted }: { date: LocalDate; muted?: boolean }) {
   const d = parseLocalDate(date);
   return (
     <div
-      className={cn(
-        'flex size-16 shrink-0 flex-col items-center justify-center rounded-xl',
-        muted ? 'bg-stage text-muted' : 'bg-brand-soft text-brand',
-      )}
+      className={cn('flex size-16 shrink-0 flex-col items-center justify-center rounded-xl', muted ? 'bg-stage text-muted' : 'bg-brand-soft text-brand')}
       aria-hidden
     >
       <span className="font-display text-2xl font-semibold leading-none">{format(d, 'd')}</span>
@@ -96,7 +93,12 @@ function ReminderItem({
       </div>
       <div className="ml-auto flex shrink-0 gap-1">
         <IconButton label={`Modifier le rappel : ${reminder.title}`} icon={<Pencil className="size-5" />} onClick={() => onEdit(reminder.id)} />
-        <IconButton label={`Supprimer le rappel : ${reminder.title}`} icon={<Trash2 className="size-5" />} tone="danger" onClick={() => onDelete(reminder.id)} />
+        <IconButton
+          label={`Supprimer le rappel : ${reminder.title}`}
+          icon={<Trash2 className="size-5" />}
+          tone="danger"
+          onClick={() => onDelete(reminder.id)}
+        />
       </div>
     </li>
   );
@@ -146,7 +148,18 @@ export function ReminderList({ upcoming, past, missed, tasksById, onEdit, onDele
           <ul className="flex flex-col gap-3">
             {upcoming.map((r) => {
               const { date } = fromEpochMs(r.nextDueAt ?? 0);
-              return <ReminderItem key={r.id} reminder={r} date={date} time={r.time} task={r.taskId ? tasksById[r.taskId] : undefined} onEdit={onEdit} onDelete={onDelete} onOpenTask={onOpenTask} />;
+              return (
+                <ReminderItem
+                  key={r.id}
+                  reminder={r}
+                  date={date}
+                  time={r.time}
+                  task={r.taskId ? tasksById[r.taskId] : undefined}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onOpenTask={onOpenTask}
+                />
+              );
             })}
           </ul>
         )}

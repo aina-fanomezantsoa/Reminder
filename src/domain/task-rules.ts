@@ -1,10 +1,7 @@
 import type { EpochMs, Task, TaskStatus } from './types';
 
 /** Champs modifiables d'une tâche (hors id/dates de création). */
-export type TaskFields = Pick<
-  Task,
-  'title' | 'status' | 'progress' | 'starred' | 'startDate' | 'endDate' | 'completedAt'
->;
+export type TaskFields = Pick<Task, 'title' | 'status' | 'progress' | 'starred' | 'startDate' | 'endDate' | 'completedAt'>;
 
 /**
  * Applique les règles de statut / progression (AMB-07, AMB-09) :

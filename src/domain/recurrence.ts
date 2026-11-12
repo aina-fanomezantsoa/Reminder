@@ -77,7 +77,7 @@ export function occurrencesBetween(rule: RecurrenceRule, fromDate: LocalDate, to
     return d >= fromDate && d <= toDate ? [occurrenceAt(rule, 0)] : out;
   }
   let k = Math.max(0, estimateIndex(rule, fromDate) - 2);
-  for (;; k++) {
+  for (; ; k++) {
     const d = occurrenceDate(rule, k);
     if (d > toDate) break;
     if (d >= fromDate) out.push(occurrenceAt(rule, k));

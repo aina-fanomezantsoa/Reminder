@@ -99,7 +99,7 @@ export default function TasksPage() {
               onMove={(id, status, beforeId) => void move(id, status, beforeId)}
               onCreateIn={editor.openCreate}
               onOpen={editor.openEdit}
-              onToggleStar={(id) => void run(() => taskService.toggleStar(id), "Impossible de modifier le favori.")}
+              onToggleStar={(id) => void run(() => taskService.toggleStar(id), 'Impossible de modifier le favori.')}
               onToggleSubtask={(id) => void run(() => taskService.toggleSubtask(id), 'Impossible de modifier la sous-tâche.')}
               onDelete={editor.requestDelete}
             />

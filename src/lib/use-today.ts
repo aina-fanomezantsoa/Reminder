@@ -11,7 +11,11 @@ const subscribe = (cb: () => void) => {
 
 /** Date du jour (locale). Chaîne vide côté serveur / pendant l'hydratation. */
 export function useToday(): LocalDate {
-  return useSyncExternalStore(subscribe, () => todayLocal(), () => '');
+  return useSyncExternalStore(
+    subscribe,
+    () => todayLocal(),
+    () => '',
+  );
 }
 
 const noopSubscribe = (cb: () => void) => {
@@ -22,5 +26,9 @@ const noopSubscribe = (cb: () => void) => {
 
 /** true sous 768 px (mobile). */
 export function useIsMobile(): boolean {
-  return useSyncExternalStore(noopSubscribe, () => window.matchMedia('(max-width: 767px)').matches, () => false);
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => window.matchMedia('(max-width: 767px)').matches,
+    () => false,
+  );
 }

@@ -44,7 +44,7 @@ interface Location {
 
 const instructions = {
   draggable:
-    "Pour déplacer une tâche, appuyez sur Espace ou Entrée sur sa poignée. Flèches gauche et droite : changer de colonne. Flèches haut et bas : changer de position. Espace : déposer. Échap : annuler.",
+    'Pour déplacer une tâche, appuyez sur Espace ou Entrée sur sa poignée. Flèches gauche et droite : changer de colonne. Flèches haut et bas : changer de position. Espace : déposer. Échap : annuler.',
 };
 
 export function KanbanBoard(props: KanbanBoardProps) {

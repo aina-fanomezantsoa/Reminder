@@ -1,22 +1,7 @@
 import { db, newId } from '../db';
-import {
-  commentSchema,
-  subtaskTitleSchema,
-  taskInputSchema,
-  taskPatchSchema,
-  validate,
-} from '@/domain/schemas';
+import { commentSchema, subtaskTitleSchema, taskInputSchema, taskPatchSchema, validate } from '@/domain/schemas';
 import { applyTaskRules, positionBetween, statusFromSubtasks, subtaskProgress } from '@/domain/task-rules';
-import type {
-  ID,
-  Reminder,
-  Subtask,
-  Task,
-  TaskComment,
-  TaskInput,
-  TaskService,
-  TaskStatus,
-} from '@/domain/types';
+import type { ID, Reminder, Subtask, Task, TaskComment, TaskInput, TaskService, TaskStatus } from '@/domain/types';
 
 const byPosition = (a: { position: number }, b: { position: number }) => a.position - b.position;
 
@@ -45,7 +30,11 @@ async function applySubtaskRules(taskId: ID): Promise<void> {
 
 /** Clôt la session ouverte de la tâche (à appeler dans une transaction incluant timeSessions). */
 async function closeOpenSession(taskId: ID, now: number): Promise<void> {
-  await db.timeSessions.where('taskId').equals(taskId).filter((s) => s.end === undefined).modify({ end: now });
+  await db.timeSessions
+    .where('taskId')
+    .equals(taskId)
+    .filter((s) => s.end === undefined)
+    .modify({ end: now });
   if ((await db.settings.get('pausedTaskId'))?.value === taskId) await db.settings.delete('pausedTaskId');
 }
 
@@ -140,9 +129,12 @@ export const taskService: TaskService & {
     await db.transaction('rw', [db.tasks, db.subtasks, db.comments, db.reminders, db.timeSessions, db.settings], async () => {
       await db.subtasks.where('taskId').equals(id).delete();
       await db.comments.where('taskId').equals(id).delete();
-      await db.reminders.where('taskId').equals(id).modify((r: Reminder) => {
-        delete r.taskId;
-      });
+      await db.reminders
+        .where('taskId')
+        .equals(id)
+        .modify((r: Reminder) => {
+          delete r.taskId;
+        });
       await db.timeSessions.where('taskId').equals(id).delete();
       if ((await db.settings.get('pausedTaskId'))?.value === id) await db.settings.delete('pausedTaskId');
       await db.tasks.delete(id);
@@ -177,10 +169,13 @@ export const taskService: TaskService & {
   },
 
   async toggleStar(id) {
-    await db.tasks.where('id').equals(id).modify((t) => {
-      t.starred = !t.starred;
-      t.updatedAt = Date.now();
-    });
+    await db.tasks
+      .where('id')
+      .equals(id)
+      .modify((t) => {
+        t.starred = !t.starred;
+        t.updatedAt = Date.now();
+      });
   },
 
   async addSubtask(taskId, title) {

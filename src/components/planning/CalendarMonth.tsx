@@ -41,7 +41,16 @@ export function monthGrid(monthStart: LocalDate): LocalDate[] {
 
 const reminderTime = (o: ReminderOccurrence) => fromEpochMs(o.at).time;
 
-export function CalendarMonth({ monthStart, entries, today, onMonthChange, onSelectTask, onSelectReminder, onCreateTask, onCreateReminder }: CalendarMonthProps) {
+export function CalendarMonth({
+  monthStart,
+  entries,
+  today,
+  onMonthChange,
+  onSelectTask,
+  onSelectReminder,
+  onCreateTask,
+  onCreateReminder,
+}: CalendarMonthProps) {
   const [dayOpen, setDayOpen] = useState<LocalDate | null>(null);
   const dots = useMediaQuery('(max-width: 767px)');
   const wide = useMediaQuery('(min-width: 1024px)');
@@ -75,11 +84,21 @@ export function CalendarMonth({ monthStart, entries, today, onMonthChange, onSel
           {title}
         </h2>
         <div className="flex items-center gap-1">
-          <IconButton label="Mois précédent" icon={<ChevronLeft className="size-5" />} className="bg-surface shadow-pill" onClick={() => go(addMonths(month, -1))} />
+          <IconButton
+            label="Mois précédent"
+            icon={<ChevronLeft className="size-5" />}
+            className="bg-surface shadow-pill"
+            onClick={() => go(addMonths(month, -1))}
+          />
           <Button variant="secondary" onClick={() => go(parseLocalDate(today || formatLocalDate(new Date())))}>
             Aujourd&apos;hui
           </Button>
-          <IconButton label="Mois suivant" icon={<ChevronRight className="size-5" />} className="bg-surface shadow-pill" onClick={() => go(addMonths(month, 1))} />
+          <IconButton
+            label="Mois suivant"
+            icon={<ChevronRight className="size-5" />}
+            className="bg-surface shadow-pill"
+            onClick={() => go(addMonths(month, 1))}
+          />
         </div>
       </div>
 
@@ -272,7 +291,10 @@ export function CalendarMonth({ monthStart, entries, today, onMonthChange, onSel
                           setDayOpen(null);
                           onSelectTask(t.id);
                         }}
-                        className={cn('flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand', a.soft)}
+                        className={cn(
+                          'flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+                          a.soft,
+                        )}
                       >
                         <span className="min-w-0 flex-1 truncate font-medium text-ink">
                           <span className="sr-only">Tâche : </span>

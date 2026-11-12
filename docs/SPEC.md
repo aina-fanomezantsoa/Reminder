@@ -23,6 +23,7 @@ Source : docs/BRIEF.md et docs/reference/1.png. Rédigé par le PM. Aucune solut
 ## 2. Bloc 1 : Rappels
 
 ### US-R1 (Must) Créer un rappel
+
 En tant qu'utilisateur, je veux créer un rappel avec un titre, une date, une heure et une note, afin de ne pas oublier quelque chose à un moment précis.
 
 - CA-R1.1 : Le formulaire contient titre, date, heure, note.
@@ -35,6 +36,7 @@ En tant qu'utilisateur, je veux créer un rappel avec un titre, une date, une he
 - CL : date/heure dans le passé (refuser ou accepter ? AMB-04) ; titre très long (limite proposée : 200 caractères, à confirmer) ; note très longue.
 
 ### US-R2 (Must) Modifier un rappel
+
 En tant qu'utilisateur, je veux modifier un rappel existant, afin de corriger ou de décaler l'échéance.
 
 - CA-R2.1 : Tous les champs (titre, date, heure, note, récurrence) sont modifiables.
@@ -43,6 +45,7 @@ En tant qu'utilisateur, je veux modifier un rappel existant, afin de corriger ou
 - CL : modification d'un rappel déjà déclenché ; modification d'un rappel récurrent (cette occurrence seulement ou toute la série ? AMB-05).
 
 ### US-R3 (Must) Supprimer un rappel
+
 En tant qu'utilisateur, je veux supprimer un rappel, afin de retirer ceux qui ne servent plus.
 
 - CA-R3.1 : Une confirmation est demandée avant suppression.
@@ -50,6 +53,7 @@ En tant qu'utilisateur, je veux supprimer un rappel, afin de retirer ceux qui ne
 - CL : suppression d'un rappel récurrent (série entière, AMB-05) ; suppression d'un rappel dont la notification est affichée.
 
 ### US-R4 (Must) Rappel récurrent
+
 En tant qu'utilisateur, je veux qu'un rappel se répète chaque jour, chaque semaine ou chaque mois, afin de ne pas le recréer à chaque fois.
 
 - CA-R4.1 : Options de récurrence : aucune (défaut), quotidienne, hebdomadaire, mensuelle. Aucune autre fréquence dans le MVP.
@@ -60,6 +64,7 @@ En tant qu'utilisateur, je veux qu'un rappel se répète chaque jour, chaque sem
 - CL : occurrences en retard pendant une période où l'application n'a pas été ouverte : règle de CA-R5.6 (AMB-03, tranché) ; changement d'heure été/hiver (l'heure locale affichée reste identique) ; années bissextiles.
 
 ### US-R5 (Must) Notification navigateur
+
 En tant qu'utilisateur, je veux recevoir une notification du navigateur à l'heure du rappel, afin d'être prévenu même si je suis sur un autre onglet.
 
 - CA-R5.1 : À la première utilisation, l'application explique le besoin puis demande la permission de notification, sur action explicite de l'utilisateur (pas de demande au chargement silencieux).
@@ -71,6 +76,7 @@ En tant qu'utilisateur, je veux recevoir une notification du navigateur à l'heu
 - CL : permission révoquée après coup ; navigateur ne supportant pas les notifications ; plusieurs rappels à la même minute (une notification chacun) ; ordinateur en veille à l'heure dite.
 
 ### US-R6 (Should) Voir l'état des rappels
+
 En tant qu'utilisateur, je veux voir mes rappels à venir et ceux déjà passés, afin de repérer ce que j'ai manqué.
 
 - CA-R6.1 : La liste distingue "à venir" (triés par date croissante) et "passés / déclenchés".
@@ -84,6 +90,7 @@ En tant qu'utilisateur, je veux voir mes rappels à venir et ceux déjà passés
 Hypothèse de modèle (à valider) : une tâche porte un titre, un statut, une progression (0-100 %), un favori (booléen), un compteur de commentaires, un compteur de pièces jointes, des sous-tâches, et des dates de début et de fin obligatoires, nécessaires au Gantt et au calendrier (AMB-06, tranché).
 
 ### US-T1 (Must) Créer une tâche
+
 En tant qu'utilisateur, je veux créer une tâche avec un titre et ses dates de début et de fin, afin de la suivre dans le planning.
 
 - CA-T1.1 : Titre obligatoire, vide ou espaces seuls refusé.
@@ -93,6 +100,7 @@ En tant qu'utilisateur, je veux créer une tâche avec un titre et ses dates de 
 - CL : tâche d'un seul jour (début = fin) ; titre long (affichage tronqué avec le titre complet accessible).
 
 ### US-T2 (Must) Modifier et supprimer une tâche
+
 En tant qu'utilisateur, je veux modifier ou supprimer une tâche, afin de garder ma liste à jour.
 
 - CA-T2.1 : Titre, dates, statut, progression et favori sont modifiables.
@@ -102,6 +110,7 @@ En tant qu'utilisateur, je veux modifier ou supprimer une tâche, afin de garder
 - CL : suppression d'une tâche affichée dans le plan du jour (AMB-13).
 
 ### US-T3 (Must) Statut
+
 En tant qu'utilisateur, je veux attribuer à une tâche un statut parmi Brouillon, En cours, En édition, Terminé, afin de suivre son avancement qualitatif.
 
 - CA-T3.1 : Exactement quatre statuts, dans cet ordre : Brouillon, En cours, En édition, Terminé. Pas de statut personnalisé.
@@ -110,6 +119,7 @@ En tant qu'utilisateur, je veux attribuer à une tâche un statut parmi Brouillo
 - CL : sens exact de "En édition" (AMB-09) ; retour de Terminé vers un autre statut (la progression reste-t-elle à 100 % ? AMB-07).
 
 ### US-T4 (Must) Progression en %
+
 En tant qu'utilisateur, je veux renseigner la progression d'une tâche en pourcentage, afin de visualiser son avancement.
 
 - CA-T4.1 : La progression est un entier de 0 à 100 ; toute valeur hors bornes ou non numérique est refusée ou bornée avec un message.
@@ -118,6 +128,7 @@ En tant qu'utilisateur, je veux renseigner la progression d'une tâche en pource
 - CL : 0 % avec statut Terminé ; 100 % avec statut Brouillon (incohérence, AMB-07).
 
 ### US-T5 (Must) Favori (étoile)
+
 En tant qu'utilisateur, je veux marquer une tâche d'une étoile, afin de repérer mes tâches importantes.
 
 - CA-T5.1 : Un clic sur l'étoile bascule favori / non favori ; l'état est visible sur la carte et persiste après rechargement.
@@ -125,6 +136,7 @@ En tant qu'utilisateur, je veux marquer une tâche d'une étoile, afin de repér
 - Hors périmètre sauf avis : filtre ou tri par favori (AMB-10).
 
 ### US-T6 (Must) Compteurs de commentaires et de pièces jointes
+
 En tant qu'utilisateur, je veux voir le nombre de commentaires et de pièces jointes d'une tâche, afin de savoir ce qui y est rattaché.
 
 - CA-T6.1 : Les deux compteurs (icône + nombre) sont affichés sur la carte de la tâche, comme dans la maquette.
@@ -133,6 +145,7 @@ En tant qu'utilisateur, je veux voir le nombre de commentaires et de pièces joi
 - CL : taille/type de fichier maximal et espace de stockage disponible si pièces jointes (AMB-08).
 
 ### US-T7 (Must) Sous-tâches
+
 En tant qu'utilisateur, je veux découper une tâche en sous-tâches, afin de détailler le travail à faire.
 
 - CA-T7.1 : Depuis une tâche, on peut ajouter, renommer, cocher (faite / à faire) et supprimer des sous-tâches.
@@ -143,6 +156,7 @@ En tant qu'utilisateur, je veux découper une tâche en sous-tâches, afin de d�
 - [AMB-11] Les sous-tâches ont-elles leur propre statut, progression, dates, assigné (lettres A/B/C/D de la maquette) ?
 
 ### US-T8 (Should) Liste et recherche
+
 En tant qu'utilisateur, je veux trouver rapidement une tâche, afin de ne pas parcourir tout le tableau.
 
 - CA-T8.1 : Une recherche par titre filtre les tâches affichées.
@@ -153,6 +167,7 @@ En tant qu'utilisateur, je veux trouver rapidement une tâche, afin de ne pas pa
 ## 4. Bloc 3 : Vue Kanban
 
 ### US-K1 (Must) Colonnes par statut
+
 En tant qu'utilisateur, je veux voir mes tâches regroupées en colonnes par statut, afin d'avoir une vue d'ensemble du flux de travail.
 
 - CA-K1.1 : Quatre colonnes : Brouillon, En cours, En édition, Terminé, dans cet ordre (maquette : DRAFT / IN PROGRESS / EDITING / DONE).
@@ -162,6 +177,7 @@ En tant qu'utilisateur, je veux voir mes tâches regroupées en colonnes par sta
 - CL : colonne avec beaucoup de cartes (défilement) ; carte au titre très long.
 
 ### US-K2 (Must) Déplacer une tâche entre colonnes
+
 En tant qu'utilisateur, je veux déplacer une tâche d'une colonne à l'autre, afin de changer son statut simplement.
 
 - CA-K2.1 : Une tâche peut être déplacée de n'importe quelle colonne vers n'importe quelle autre (pas de contrainte d'ordre). [AMB-09]
@@ -177,6 +193,7 @@ En tant qu'utilisateur, je veux déplacer une tâche d'une colonne à l'autre, a
 ## 5. Bloc 4 : Planning
 
 ### US-P1 (Must) Vue Gantt / timeline
+
 En tant qu'utilisateur, je veux voir mes tâches sous forme de barres sur une échelle de jours, afin de visualiser leur durée et leur chevauchement.
 
 - CA-P1.1 : Une ligne par tâche ; la barre commence à la date de début et finit à la date de fin.
@@ -189,6 +206,7 @@ En tant qu'utilisateur, je veux voir mes tâches sous forme de barres sur une é
 - CL : tâche d'un jour (barre minimale visible) ; tâche très longue dépassant la fenêtre (barre tronquée avec indication) ; beaucoup de tâches (défilement vertical) ; barre à 0 % et à 100 %.
 
 ### US-P2 (Must) Vue calendrier
+
 En tant qu'utilisateur, je veux voir mes tâches et rappels dans un calendrier, afin de savoir ce qui est prévu chaque jour.
 
 - CA-P2.1 : Vue mensuelle avec navigation mois précédent / suivant / aujourd'hui.
@@ -199,6 +217,7 @@ En tant qu'utilisateur, je veux voir mes tâches et rappels dans un calendrier, 
 - CL : jour avec beaucoup d'éléments ("+ n autres") ; changement d'année ; mois à 28/29/30/31 jours.
 
 ### US-P3 (Must) Plan du jour
+
 MISE À JOUR : les créneaux horaires (planSlots, SlotForm) sont remplacés par un chronomètre par sessions (table `timeSessions`, `services/timer.ts`, `domain/time-sessions.ts`).
 
 En tant qu'utilisateur, je veux chronométrer le temps passé sur mes tâches, afin de savoir combien de temps j'y ai consacré aujourd'hui.
@@ -214,6 +233,7 @@ En tant qu'utilisateur, je veux chronométrer le temps passé sur mes tâches, a
 ## 6. Bloc 5 : Tableau de bord
 
 ### US-D1 (Must) Anneaux d'efficacité
+
 En tant qu'utilisateur, je veux voir des indicateurs d'efficacité sous forme d'anneaux de progression, afin d'évaluer d'un coup d'oeil mon avancement.
 
 - CA-D1.1 (AMB-18, tranché) : Un anneau par tâche/projet, dont la valeur est la progression (%) de la tâche, de 0 à 100, avec le titre de la tâche en libellé.
@@ -223,6 +243,7 @@ En tant qu'utilisateur, je veux voir des indicateurs d'efficacité sous forme d'
 - Note : la partie "auteurs" de la maquette (A/B/C/D) n'est pas reprise pour les anneaux ; elle reste ouverte pour l'histogramme (AMB-18, partie histogramme).
 
 ### US-D2 (Must) Histogramme des tâches terminées
+
 En tant qu'utilisateur, je veux voir le nombre de tâches terminées dans un histogramme, afin de suivre ma productivité.
 
 - CA-D2.1 : Les barres représentent un nombre de tâches terminées, avec une valeur numérique et un libellé par barre.
@@ -232,6 +253,7 @@ En tant qu'utilisateur, je veux voir le nombre de tâches terminées dans un his
 - CL : tâche terminée avant la période affichée ; tâche terminée puis rouverte ; changement de mois.
 
 ### US-D3 (Should) Panneau profil
+
 En tant qu'utilisateur, je veux voir un en-tête personnel (nom, avatar), afin que l'application soit personnalisée comme dans la maquette.
 
 - CA-D3.1 : Affichage d'un nom et d'un avatar par défaut. Édition du nom : à confirmer (AMB-19). Pas de compte ni de connexion.
@@ -251,32 +273,32 @@ En tant qu'utilisateur, je veux voir un en-tête personnel (nom, avatar), afin q
 
 ## 8. Récapitulatif des priorités
 
-| Priorité | Stories |
-|---|---|
-| Must | US-R1, R2, R3, R4, R5 ; US-T1 à T7 ; US-K1, K2 ; US-P1, P2, P3 ; US-D1, D2 |
-| Should | US-R6, US-T8, US-D3, réordonnancement des cartes (K2), vue semaine (P2), repère du jour courant (P1) |
+| Priorité | Stories                                                                                              |
+| -------- | ---------------------------------------------------------------------------------------------------- |
+| Must     | US-R1, R2, R3, R4, R5 ; US-T1 à T7 ; US-K1, K2 ; US-P1, P2, P3 ; US-D1, D2                           |
+| Should   | US-R6, US-T8, US-D3, réordonnancement des cartes (K2), vue semaine (P2), repère du jour courant (P1) |
 
 ## 9. Ambiguïtés à faire trancher par le client
 
-| ID | Question | Hypothèse de travail |
-|---|---|---|
-| AMB-01 | **TRANCHÉ** : rappel lié à une tâche, oui, optionnel | CA-R1.6, CA-R1.7, CA-T2.4 |
-| AMB-02 | **TRANCHÉ** : application ouverte suffisante, pas de notification onglet fermé ; manqués affichés à la réouverture | CA-R5.5 |
-| AMB-03 | **TRANCHÉ** (aligné sur ARCHITECTURE.md) : occurrence en retard de plus de 5 min = manquée ; seule la plus récente est journalisée | CA-R5.6 |
-| AMB-04 | Autorise-t-on un rappel avec date/heure dans le passé ? | Refusé à la création |
-| AMB-05 | Récurrence : modifier/supprimer une occurrence ou toute la série ? Date de fin ? Plusieurs jours par semaine ? Mensuel le 31 ? | Série entière ; sans fin ; un seul jour ; dernier jour du mois |
-| AMB-06 | **TRANCHÉ** : dates de début et de fin obligatoires ; toute tâche apparaît dans le Gantt | CA-T1.3, CA-P1.4 |
-| AMB-07 | Règles entre statut, progression et sous-tâches (Terminé = 100 % ? progression calculée depuis les sous-tâches ?) | Progression manuelle ; Terminé force 100 % |
-| AMB-08 | Commentaires et pièces jointes : l'utilisateur peut-il en ajouter ? Types, taille, stockage ? | Commentaires texte oui ; pièces jointes à décider |
-| AMB-09 | Signification de "En édition" ; transitions libres entre statuts ? | Transitions libres |
-| AMB-10 | Filtre/tri par favori, recherche : dans le MVP ? | Non (Should, après validation) |
-| AMB-11 | Sous-tâches : un niveau seulement ? statut, progression, dates, "assigné" (A/B/C/D) propres ? | Un niveau, case à cocher seulement |
-| AMB-12 | Ordre des cartes dans une colonne Kanban : à conserver ? | Should |
-| AMB-13 | Plan du jour : créneaux libres ou liés à des tâches ? Autres jours que le jour courant ? Chevauchements ? Récurrence ? | Libres ou liés, jour courant, chevauchement avec avertissement |
-| AMB-14 | Gantt interactif (glisser pour changer dates/progression) ou lecture seule ? | Lecture seule |
-| AMB-15 | Calendrier : affiche-t-il rappels et tâches ? Vues mois seul ou mois+semaine+jour ? | Mois ; tâches et rappels |
-| AMB-16 | Où vivent les rappels dans la navigation (écran dédié ?) ; que devient "Analytics" par rapport au "Dashboard" ? | Écran "Rappels" dédié ; Analytics fusionné au Dashboard |
-| AMB-17 | Confirmer l'exclusion de Message, Global, Finance, Pricing, About, Language, Conditions et de la langue anglaise de la maquette. | Exclus, interface en français |
-| AMB-18 | **TRANCHÉ pour les anneaux** : un anneau par tâche/projet = sa progression (CA-D1.1). **Reste ouvert pour l'histogramme** : axe et période, usage d'"auteurs" avec un seul utilisateur. | Histogramme : par jour sur 7 derniers jours (US-D2) |
-| AMB-19 | Le profil (nom, avatar) est-il éditable ? | Nom éditable, avatar par défaut |
-| AMB-20 | Usage mobile / responsive attendu ? Usage sur plusieurs appareils (données non synchronisées sans serveur) ? Export/sauvegarde des données ? | Bureau d'abord ; un seul appareil ; pas d'export |
+| ID     | Question                                                                                                                                                                                | Hypothèse de travail                                           |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| AMB-01 | **TRANCHÉ** : rappel lié à une tâche, oui, optionnel                                                                                                                                    | CA-R1.6, CA-R1.7, CA-T2.4                                      |
+| AMB-02 | **TRANCHÉ** : application ouverte suffisante, pas de notification onglet fermé ; manqués affichés à la réouverture                                                                      | CA-R5.5                                                        |
+| AMB-03 | **TRANCHÉ** (aligné sur ARCHITECTURE.md) : occurrence en retard de plus de 5 min = manquée ; seule la plus récente est journalisée                                                      | CA-R5.6                                                        |
+| AMB-04 | Autorise-t-on un rappel avec date/heure dans le passé ?                                                                                                                                 | Refusé à la création                                           |
+| AMB-05 | Récurrence : modifier/supprimer une occurrence ou toute la série ? Date de fin ? Plusieurs jours par semaine ? Mensuel le 31 ?                                                          | Série entière ; sans fin ; un seul jour ; dernier jour du mois |
+| AMB-06 | **TRANCHÉ** : dates de début et de fin obligatoires ; toute tâche apparaît dans le Gantt                                                                                                | CA-T1.3, CA-P1.4                                               |
+| AMB-07 | Règles entre statut, progression et sous-tâches (Terminé = 100 % ? progression calculée depuis les sous-tâches ?)                                                                       | Progression manuelle ; Terminé force 100 %                     |
+| AMB-08 | Commentaires et pièces jointes : l'utilisateur peut-il en ajouter ? Types, taille, stockage ?                                                                                           | Commentaires texte oui ; pièces jointes à décider              |
+| AMB-09 | Signification de "En édition" ; transitions libres entre statuts ?                                                                                                                      | Transitions libres                                             |
+| AMB-10 | Filtre/tri par favori, recherche : dans le MVP ?                                                                                                                                        | Non (Should, après validation)                                 |
+| AMB-11 | Sous-tâches : un niveau seulement ? statut, progression, dates, "assigné" (A/B/C/D) propres ?                                                                                           | Un niveau, case à cocher seulement                             |
+| AMB-12 | Ordre des cartes dans une colonne Kanban : à conserver ?                                                                                                                                | Should                                                         |
+| AMB-13 | Plan du jour : créneaux libres ou liés à des tâches ? Autres jours que le jour courant ? Chevauchements ? Récurrence ?                                                                  | Libres ou liés, jour courant, chevauchement avec avertissement |
+| AMB-14 | Gantt interactif (glisser pour changer dates/progression) ou lecture seule ?                                                                                                            | Lecture seule                                                  |
+| AMB-15 | Calendrier : affiche-t-il rappels et tâches ? Vues mois seul ou mois+semaine+jour ?                                                                                                     | Mois ; tâches et rappels                                       |
+| AMB-16 | Où vivent les rappels dans la navigation (écran dédié ?) ; que devient "Analytics" par rapport au "Dashboard" ?                                                                         | Écran "Rappels" dédié ; Analytics fusionné au Dashboard        |
+| AMB-17 | Confirmer l'exclusion de Message, Global, Finance, Pricing, About, Language, Conditions et de la langue anglaise de la maquette.                                                        | Exclus, interface en français                                  |
+| AMB-18 | **TRANCHÉ pour les anneaux** : un anneau par tâche/projet = sa progression (CA-D1.1). **Reste ouvert pour l'histogramme** : axe et période, usage d'"auteurs" avec un seul utilisateur. | Histogramme : par jour sur 7 derniers jours (US-D2)            |
+| AMB-19 | Le profil (nom, avatar) est-il éditable ?                                                                                                                                               | Nom éditable, avatar par défaut                                |
+| AMB-20 | Usage mobile / responsive attendu ? Usage sur plusieurs appareils (données non synchronisées sans serveur) ? Export/sauvegarde des données ?                                            | Bureau d'abord ; un seul appareil ; pas d'export               |

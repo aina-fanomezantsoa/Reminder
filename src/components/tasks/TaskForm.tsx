@@ -49,7 +49,13 @@ export function TaskForm({ mode, initial: liveInitial, defaultStatus, defaultDat
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [snap] = useState(() => ({ title, startDate, endDate, status, progress, starred }));
-  const dirty = title !== snap.title || startDate !== snap.startDate || endDate !== snap.endDate || status !== snap.status || progress !== snap.progress || starred !== snap.starred;
+  const dirty =
+    title !== snap.title ||
+    startDate !== snap.startDate ||
+    endDate !== snap.endDate ||
+    status !== snap.status ||
+    progress !== snap.progress ||
+    starred !== snap.starred;
   const { requestClose, dialog } = useDirtyGuard(dirty && !submitting, onClose);
 
   const isDone = status === 'done';
@@ -94,106 +100,118 @@ export function TaskForm({ mode, initial: liveInitial, defaultStatus, defaultDat
 
   return (
     <>
-    <Modal
-      open
-      size="lg"
-      title={mode === 'create' ? 'Nouvelle tâche' : 'Modifier la tâche'}
-      onClose={requestClose}
-      footer={
-        <>
-          {mode === 'edit' && onDelete && taskId && (
-            <Button variant="danger" size="md" leftIcon={<Trash2 className="size-4" aria-hidden />} onClick={() => onDelete(taskId)} className="mr-auto">
-              Supprimer
+      <Modal
+        open
+        size="lg"
+        title={mode === 'create' ? 'Nouvelle tâche' : 'Modifier la tâche'}
+        onClose={requestClose}
+        footer={
+          <>
+            {mode === 'edit' && onDelete && taskId && (
+              <Button variant="danger" size="md" leftIcon={<Trash2 className="size-4" aria-hidden />} onClick={() => onDelete(taskId)} className="mr-auto">
+                Supprimer
+              </Button>
+            )}
+            <Button variant="secondary" onClick={requestClose}>
+              Annuler
             </Button>
-          )}
-          <Button variant="secondary" onClick={requestClose}>
-            Annuler
-          </Button>
-          <Button type="submit" form={formId} loading={submitting}>
-            Enregistrer
-          </Button>
-        </>
-      }
-    >
-      <form id={formId} onSubmit={submit} noValidate className="flex flex-col gap-5 pt-2">
-        <div role="status" aria-live="polite" className="sr-only">
-          {errorCount > 0 ? `${errorCount} erreur${errorCount > 1 ? 's' : ''} dans le formulaire.` : ''}
-        </div>
+            <Button type="submit" form={formId} loading={submitting}>
+              Enregistrer
+            </Button>
+          </>
+        }
+      >
+        <form id={formId} onSubmit={submit} noValidate className="flex flex-col gap-5 pt-2">
+          <div role="status" aria-live="polite" className="sr-only">
+            {errorCount > 0 ? `${errorCount} erreur${errorCount > 1 ? 's' : ''} dans le formulaire.` : ''}
+          </div>
 
-        <Field label="Titre" htmlFor={fid('title')} required error={errors.title} hint={title.length >= 180 ? `${title.length} / ${MAX_TITLE} caractères` : undefined}>
-          <input
-            type="text"
-            value={title}
-            data-autofocus
-            autoComplete="off"
-            onChange={(e) => setTitle(e.target.value)}
-            className={controlClass(Boolean(errors.title))}
-          />
-        </Field>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Début" htmlFor={fid('startDate')} required error={errors.startDate}>
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className={controlClass(Boolean(errors.startDate))} />
+          <Field
+            label="Titre"
+            htmlFor={fid('title')}
+            required
+            error={errors.title}
+            hint={title.length >= 180 ? `${title.length} / ${MAX_TITLE} caractères` : undefined}
+          >
+            <input
+              type="text"
+              value={title}
+              data-autofocus
+              autoComplete="off"
+              onChange={(e) => setTitle(e.target.value)}
+              className={controlClass(Boolean(errors.title))}
+            />
           </Field>
-          <Field label="Fin" htmlFor={fid('endDate')} required error={errors.endDate}>
-            <input type="date" value={endDate} min={startDate || undefined} onChange={(e) => setEndDate(e.target.value)} className={controlClass(Boolean(errors.endDate))} />
-          </Field>
-        </div>
 
-        <div className="flex flex-col gap-2">
-          <span id={fid('status-label')} className="text-sm font-medium text-ink">
-            Statut
-          </span>
-          <Segmented
-            ariaLabel="Statut"
-            value={status}
-            onChange={setStatus}
-            options={TASK_STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s], dot: STATUS_STYLES[s].dot }))}
-          />
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <div className="grid items-start gap-4 sm:grid-cols-[1fr_7rem]">
-            <Field
-              label="Progression"
-              htmlFor={fid('progress-range')}
-              hint={isDone ? 'Une tâche terminée est à 100 %.' : hasSubtasks ? 'Calculée selon les sous-tâches cochées.' : undefined}
-              className="min-w-0"
-            >
-              <input
-                type="range"
-                min={0}
-                max={100}
-                step={1}
-                disabled={auto}
-                value={progressValid ? progressValue : 0}
-                onChange={(e) => setProgress(e.target.value)}
-                className="h-11 w-full accent-brand"
-              />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Début" htmlFor={fid('startDate')} required error={errors.startDate}>
+              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className={controlClass(Boolean(errors.startDate))} />
             </Field>
-            <Field label="En %" htmlFor={fid('progress')} error={errors.progress}>
+            <Field label="Fin" htmlFor={fid('endDate')} required error={errors.endDate}>
               <input
-                type="number"
-                inputMode="numeric"
-                min={0}
-                max={100}
-                step={1}
-                disabled={auto}
-                value={auto ? String(progressValue) : progress}
-                onChange={(e) => setProgress(e.target.value)}
-                className={controlClass(Boolean(errors.progress))}
+                type="date"
+                value={endDate}
+                min={startDate || undefined}
+                onChange={(e) => setEndDate(e.target.value)}
+                className={controlClass(Boolean(errors.endDate))}
               />
             </Field>
           </div>
-          <ProgressBar value={progressValid ? progressValue : 0} />
-        </div>
 
-        <StarButton active={starred} onToggle={() => setStarred((v) => !v)} label="Marquer comme favori" showLabel className="self-start" />
-      </form>
+          <div className="flex flex-col gap-2">
+            <span id={fid('status-label')} className="text-sm font-medium text-ink">
+              Statut
+            </span>
+            <Segmented
+              ariaLabel="Statut"
+              value={status}
+              onChange={setStatus}
+              options={TASK_STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s], dot: STATUS_STYLES[s].dot }))}
+            />
+          </div>
 
-      {mode === 'edit' && liveInitial && <EditSections task={liveInitial} onAddReminder={onAddReminder} />}
-    </Modal>
-    {dialog}
+          <div className="flex flex-col gap-3">
+            <div className="grid items-start gap-4 sm:grid-cols-[1fr_7rem]">
+              <Field
+                label="Progression"
+                htmlFor={fid('progress-range')}
+                hint={isDone ? 'Une tâche terminée est à 100 %.' : hasSubtasks ? 'Calculée selon les sous-tâches cochées.' : undefined}
+                className="min-w-0"
+              >
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={1}
+                  disabled={auto}
+                  value={progressValid ? progressValue : 0}
+                  onChange={(e) => setProgress(e.target.value)}
+                  className="h-11 w-full accent-brand"
+                />
+              </Field>
+              <Field label="En %" htmlFor={fid('progress')} error={errors.progress}>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={100}
+                  step={1}
+                  disabled={auto}
+                  value={auto ? String(progressValue) : progress}
+                  onChange={(e) => setProgress(e.target.value)}
+                  className={controlClass(Boolean(errors.progress))}
+                />
+              </Field>
+            </div>
+            <ProgressBar value={progressValid ? progressValue : 0} />
+          </div>
+
+          <StarButton active={starred} onToggle={() => setStarred((v) => !v)} label="Marquer comme favori" showLabel className="self-start" />
+        </form>
+
+        {mode === 'edit' && liveInitial && <EditSections task={liveInitial} onAddReminder={onAddReminder} />}
+      </Modal>
+      {dialog}
     </>
   );
 }
@@ -249,12 +267,7 @@ function EditSections({ task, onAddReminder }: { task: TaskCardData; onAddRemind
           ))}
         </ul>
         <Field label="Ajouter un commentaire" htmlFor={`comment-${task.id}`} error={commentError}>
-          <textarea
-            rows={2}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className={controlClass(Boolean(commentError))}
-          />
+          <textarea rows={2} value={text} onChange={(e) => setText(e.target.value)} className={controlClass(Boolean(commentError))} />
         </Field>
         <Button variant="secondary" size="sm" className="mt-2" onClick={() => void addComment()}>
           Commenter

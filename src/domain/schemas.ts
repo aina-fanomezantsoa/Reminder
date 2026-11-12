@@ -7,10 +7,8 @@ const title = z
   .min(1, 'Le titre est obligatoire.')
   .max(200, 'Le titre ne doit pas dépasser 200 caractères.');
 
-const localDate = (msg: string) =>
-  z.string({ error: msg }).refine(isValidLocalDate, { message: msg });
-const localTime = (msg: string) =>
-  z.string({ error: msg }).refine(isValidLocalTime, { message: msg });
+const localDate = (msg: string) => z.string({ error: msg }).refine(isValidLocalDate, { message: msg });
+const localTime = (msg: string) => z.string({ error: msg }).refine(isValidLocalTime, { message: msg });
 
 const optionalId = z.string().min(1).optional();
 
@@ -68,10 +66,7 @@ export const commentSchema = z.object({
 });
 
 // ---------- Utilitaire de validation -> Result ----------
-export function validate<S extends z.ZodType>(
-  schema: S,
-  input: unknown,
-): { ok: true; value: z.output<S> } | { ok: false; errors: Record<string, string> } {
+export function validate<S extends z.ZodType>(schema: S, input: unknown): { ok: true; value: z.output<S> } | { ok: false; errors: Record<string, string> } {
   const parsed = schema.safeParse(input);
   if (parsed.success) return { ok: true, value: parsed.data };
   const errors: Record<string, string> = {};

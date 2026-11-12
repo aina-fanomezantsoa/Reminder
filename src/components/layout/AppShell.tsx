@@ -50,59 +50,72 @@ export function AppShell({ children }: { children: ReactNode }) {
     return () => notificationService.stop();
   }, []);
 
-  const panel = <RightPanel variant={isDashboard ? 'compact' : 'full'} profile={profile} date={today} onRenameProfile={(displayName) => settingsService.setProfile({ displayName })} />;
+  const panel = (
+    <RightPanel
+      variant={isDashboard ? 'compact' : 'full'}
+      profile={profile}
+      date={today}
+      onRenameProfile={(displayName) => settingsService.setProfile({ displayName })}
+    />
+  );
 
   return (
     <ToastProvider>
       <ReminderEditorProvider>
-      <TaskEditorProvider>
-        <a
-          href="#contenu"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
-        >
-          Aller au contenu
-        </a>
-        <div className="flex min-h-dvh">
-          <Sidebar activeHref={pathname} collapsed={collapsed} />
-          <div className="flex min-w-0 flex-1 flex-col">
-            <header className="flex items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:py-4 md:px-8">
-              <div className="flex items-center gap-2">
-                <IconButton
-                  label={collapsed ? 'Déplier le menu' : 'Réduire le menu'}
-                  icon={<Menu className="size-5" />}
-                  className="hidden xl:inline-flex"
-                  aria-expanded={!collapsed}
-                  onClick={() => setCollapsed((v) => !v)}
-                />
-                <Breadcrumb items={breadcrumbFor(pathname)} />
-              </div>
-              <div className="flex items-center gap-2">
-                {compact && (
-                  <IconButton label="Aujourd'hui : plan et statistiques" icon={<CalendarClock className="size-5" />} aria-haspopup="dialog" onClick={() => setDrawerOpen(true)} className="bg-surface shadow-pill" />
+        <TaskEditorProvider>
+          <a
+            href="#contenu"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
+          >
+            Aller au contenu
+          </a>
+          <div className="flex min-h-dvh">
+            <Sidebar activeHref={pathname} collapsed={collapsed} />
+            <div className="flex min-w-0 flex-1 flex-col">
+              <header className="flex items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:py-4 md:px-8">
+                <div className="flex items-center gap-2">
+                  <IconButton
+                    label={collapsed ? 'Déplier le menu' : 'Réduire le menu'}
+                    icon={<Menu className="size-5" />}
+                    className="hidden xl:inline-flex"
+                    aria-expanded={!collapsed}
+                    onClick={() => setCollapsed((v) => !v)}
+                  />
+                  <Breadcrumb items={breadcrumbFor(pathname)} />
+                </div>
+                <div className="flex items-center gap-2">
+                  {compact && (
+                    <IconButton
+                      label="Aujourd'hui : plan et statistiques"
+                      icon={<CalendarClock className="size-5" />}
+                      aria-haspopup="dialog"
+                      onClick={() => setDrawerOpen(true)}
+                      className="bg-surface shadow-pill"
+                    />
+                  )}
+                  <NotificationStatusChip permission={permission} />
+                </div>
+              </header>
+              <div className="flex flex-1 flex-col gap-8 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:px-8 md:pb-10 xl:flex-row">
+                <main id="contenu" tabIndex={-1} className="min-w-0 flex-1 focus:outline-none">
+                  <MissedBannerHost />
+                  <TimerResumeHost />
+                  <StorageGuard>{children}</StorageGuard>
+                </main>
+                {!compact && (
+                  <aside aria-label="Panneau latéral" className="shrink-0 xl:w-80">
+                    {panel}
+                  </aside>
                 )}
-                <NotificationStatusChip permission={permission} />
               </div>
-            </header>
-            <div className="flex flex-1 flex-col gap-8 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:px-8 md:pb-10 xl:flex-row">
-              <main id="contenu" tabIndex={-1} className="min-w-0 flex-1 focus:outline-none">
-                <MissedBannerHost />
-                <TimerResumeHost />
-                <StorageGuard>{children}</StorageGuard>
-              </main>
-              {!compact && (
-                <aside aria-label="Panneau latéral" className="shrink-0 xl:w-80">
-                  {panel}
-                </aside>
-              )}
             </div>
           </div>
-        </div>
-        <TimerTitle />
-        <BottomNav activeHref={pathname} />
-        <Drawer open={drawerOpen} title="Aujourd'hui" onClose={() => setDrawerOpen(false)}>
-          {panel}
-        </Drawer>
-      </TaskEditorProvider>
+          <TimerTitle />
+          <BottomNav activeHref={pathname} />
+          <Drawer open={drawerOpen} title="Aujourd'hui" onClose={() => setDrawerOpen(false)}>
+            {panel}
+          </Drawer>
+        </TaskEditorProvider>
       </ReminderEditorProvider>
     </ToastProvider>
   );

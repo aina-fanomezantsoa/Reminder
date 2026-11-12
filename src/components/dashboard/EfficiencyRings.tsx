@@ -24,7 +24,11 @@ export function EfficiencyRings({ rings, size, limit, totalTasks, onSelect, onCr
       <div className="flex flex-col items-start gap-1 text-sm text-muted">
         <p>Pas encore de tâche à suivre.</p>
         {onCreate && (
-          <button type="button" onClick={onCreate} className="rounded font-medium text-brand underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
+          <button
+            type="button"
+            onClick={onCreate}
+            className="rounded font-medium text-brand underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          >
             Créer une tâche
           </button>
         )}
@@ -72,13 +76,19 @@ export function EfficiencyRings({ rings, size, limit, totalTasks, onSelect, onCr
                   </svg>
                   <span
                     aria-hidden
-                    className={cn('absolute inset-0 flex items-center justify-center font-display font-semibold tabular-nums text-ink', size === 'sm' ? 'text-xs' : 'text-xl')}
+                    className={cn(
+                      'absolute inset-0 flex items-center justify-center font-display font-semibold tabular-nums text-ink',
+                      size === 'sm' ? 'text-xs' : 'text-xl',
+                    )}
                   >
                     {ring.percent}
                     {size === 'lg' && <span className="text-sm">%</span>}
                   </span>
                 </span>
-                <span aria-hidden className={cn('text-ink', size === 'sm' ? 'font-display text-xs font-semibold' : 'line-clamp-2 text-center text-xs font-medium')}>
+                <span
+                  aria-hidden
+                  className={cn('text-ink', size === 'sm' ? 'font-display text-xs font-semibold' : 'line-clamp-2 text-center text-xs font-medium')}
+                >
                   {size === 'sm' ? (ring.label.trim()[0] ?? '?').toLocaleUpperCase('fr') : ring.label}
                 </span>
               </button>
@@ -87,7 +97,10 @@ export function EfficiencyRings({ rings, size, limit, totalTasks, onSelect, onCr
         })}
       </ul>
       {totalTasks !== undefined && totalTasks > shown.length && (
-        <Link href="/tasks" className="mt-4 inline-block rounded text-sm font-medium text-brand underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
+        <Link
+          href="/tasks"
+          className="mt-4 inline-block rounded text-sm font-medium text-brand underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+        >
           Voir toutes les tâches ({totalTasks})
         </Link>
       )}

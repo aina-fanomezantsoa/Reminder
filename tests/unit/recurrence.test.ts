@@ -1,12 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  latestOccurrenceAtOrBefore,
-  nextOccurrenceAfter,
-  occurrenceAt,
-  occurrenceDate,
-  occurrencesBetween,
-  type RecurrenceRule,
-} from '@/domain/recurrence';
+import { latestOccurrenceAtOrBefore, nextOccurrenceAfter, occurrenceAt, occurrenceDate, occurrencesBetween, type RecurrenceRule } from '@/domain/recurrence';
 import { fromEpochMs, toEpochMs } from '@/domain/dates';
 
 const rule = (startDate: string, recurrence: RecurrenceRule['recurrence'], time = '09:00'): RecurrenceRule => ({
@@ -18,7 +11,7 @@ const fmt = (ms: number | null) => (ms === null ? null : `${fromEpochMs(ms).date
 
 describe('recurrence none', () => {
   const r = rule('2026-03-10', 'none');
-  it('renvoie l\'unique occurrence si future, sinon null', () => {
+  it("renvoie l'unique occurrence si future, sinon null", () => {
     expect(fmt(nextOccurrenceAfter(r, toEpochMs('2026-03-10', '08:59')))).toBe('2026-03-10 09:00');
     expect(nextOccurrenceAfter(r, toEpochMs('2026-03-10', '09:00'))).toBeNull(); // strictement après
     expect(nextOccurrenceAfter(r, toEpochMs('2027-01-01', '00:00'))).toBeNull();
@@ -32,7 +25,7 @@ describe('recurrence none', () => {
 
 describe('daily', () => {
   const r = rule('2026-01-30', 'daily', '07:30');
-  it('+k jours, passage de mois et d\'année', () => {
+  it("+k jours, passage de mois et d'année", () => {
     expect(occurrenceDate(r, 0)).toBe('2026-01-30');
     expect(occurrenceDate(r, 2)).toBe('2026-02-01');
     expect(occurrenceDate(rule('2026-12-31', 'daily'), 1)).toBe('2027-01-01');
@@ -83,13 +76,7 @@ describe('weekly', () => {
 describe('monthly (fin de mois)', () => {
   it('31 janvier : 28 février, puis retour au 31 mars (CA-R4.4)', () => {
     const r = rule('2026-01-31', 'monthly');
-    expect([0, 1, 2, 3, 4].map((k) => occurrenceDate(r, k))).toEqual([
-      '2026-01-31',
-      '2026-02-28',
-      '2026-03-31',
-      '2026-04-30',
-      '2026-05-31',
-    ]);
+    expect([0, 1, 2, 3, 4].map((k) => occurrenceDate(r, k))).toEqual(['2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30', '2026-05-31']);
   });
   it('année bissextile : 29 février 2028', () => {
     const r = rule('2028-01-31', 'monthly');
@@ -102,12 +89,12 @@ describe('monthly (fin de mois)', () => {
     expect(occurrenceDate(rule('2026-01-30', 'monthly'), 2)).toBe('2026-03-30');
     expect(occurrenceDate(rule('2028-01-29', 'monthly'), 1)).toBe('2028-02-29');
   });
-  it('passage d\'année', () => {
+  it("passage d'année", () => {
     const r = rule('2026-11-15', 'monthly');
     expect(occurrenceDate(r, 2)).toBe('2027-01-15');
     expect(occurrenceDate(r, 14)).toBe('2028-01-15');
   });
-  it('nextOccurrenceAfter ne dérive pas (depuis l\'ancre)', () => {
+  it("nextOccurrenceAfter ne dérive pas (depuis l'ancre)", () => {
     const r = rule('2026-01-31', 'monthly');
     expect(fmt(nextOccurrenceAfter(r, toEpochMs('2026-01-31', '09:00')))).toBe('2026-02-28 09:00');
     expect(fmt(nextOccurrenceAfter(r, toEpochMs('2026-02-28', '09:00')))).toBe('2026-03-31 09:00');
@@ -119,22 +106,17 @@ describe('monthly (fin de mois)', () => {
     const r = rule('2026-01-31', 'monthly');
     expect(occurrencesBetween(r, '2026-02-01', '2026-02-28').map((m) => fromEpochMs(m).date)).toEqual(['2026-02-28']);
     expect(occurrencesBetween(r, '2026-02-01', '2026-02-27')).toEqual([]);
-    expect(occurrencesBetween(r, '2026-01-01', '2026-04-30').map((m) => fromEpochMs(m).date)).toEqual([
-      '2026-01-31',
-      '2026-02-28',
-      '2026-03-31',
-      '2026-04-30',
-    ]);
+    expect(occurrencesBetween(r, '2026-01-01', '2026-04-30').map((m) => fromEpochMs(m).date)).toEqual(['2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30']);
   });
 });
 
-describe('heure locale et changement d\'heure', () => {
-  it('conserve l\'heure affichée après le passage à l\'heure d\'été (Europe/Paris, 29 mars 2026)', () => {
+describe("heure locale et changement d'heure", () => {
+  it("conserve l'heure affichée après le passage à l'heure d'été (Europe/Paris, 29 mars 2026)", () => {
     const r = rule('2026-03-27', 'daily', '09:00');
     for (let k = 0; k < 5; k++) expect(fromEpochMs(occurrenceAt(r, k)).time).toBe('09:00');
     expect(occurrencesBetween(r, '2026-03-27', '2026-03-31')).toHaveLength(5);
   });
-  it('conserve l\'heure après le retour à l\'heure d\'hiver (25 octobre 2026)', () => {
+  it("conserve l'heure après le retour à l'heure d'hiver (25 octobre 2026)", () => {
     const r = rule('2026-10-23', 'daily', '23:30');
     for (let k = 0; k < 5; k++) expect(fromEpochMs(occurrenceAt(r, k)).time).toBe('23:30');
   });

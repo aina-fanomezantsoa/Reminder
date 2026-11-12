@@ -2,17 +2,9 @@ import { db, newId } from '../db';
 import { reminderInputSchema, validate } from '@/domain/schemas';
 import { toEpochMs } from '@/domain/dates';
 import { nextOccurrenceAfter, occurrencesBetween as ruleOccurrences } from '@/domain/recurrence';
-import type {
-  ID,
-  LocalDate,
-  Reminder,
-  ReminderInput,
-  ReminderOccurrence,
-  ReminderService,
-  Result,
-} from '@/domain/types';
+import type { ID, LocalDate, Reminder, ReminderInput, ReminderOccurrence, ReminderService, Result } from '@/domain/types';
 
-const PAST_MSG = 'La date et l\'heure doivent être dans le futur.';
+const PAST_MSG = "La date et l'heure doivent être dans le futur.";
 
 /** `now` injectable pour les tests (horloge simulée). */
 type Clock = () => number;
@@ -29,11 +21,7 @@ async function save(id: ID | null, input: ReminderInput, now: number): Promise<R
     if (id && !existing) return { ok: false as const, errors: { title: 'Rappel introuvable.' } };
 
     const rule = { startDate: d.startDate, time: d.time, recurrence: d.recurrence };
-    const sameRule =
-      !!existing &&
-      existing.startDate === d.startDate &&
-      existing.time === d.time &&
-      existing.recurrence === d.recurrence;
+    const sameRule = !!existing && existing.startDate === d.startDate && existing.time === d.time && existing.recurrence === d.recurrence;
 
     // AMB-04 : date/heure passée refusée à la création et quand l'ancre est modifiée.
     // Modifier seulement titre/note/tâche d'une série dont l'ancre est passée reste permis.

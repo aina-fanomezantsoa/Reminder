@@ -111,7 +111,13 @@ export function PlanDayPanel({ date, today, tasks, onStart, onPause, onStop, onR
           <label htmlFor={selectId} className="text-xs font-medium text-ink">
             Tâche à chronométrer
           </label>
-          <select id={selectId} value={target} onChange={(e) => setPicked(e.target.value)} disabled={open.length === 0} className={cn(controlClass(), 'min-h-11 truncate')}>
+          <select
+            id={selectId}
+            value={target}
+            onChange={(e) => setPicked(e.target.value)}
+            disabled={open.length === 0}
+            className={cn(controlClass(), 'min-h-11 truncate')}
+          >
             {open.length === 0 && <option value="">Aucune tâche en cours</option>}
             {open.map((t) => (
               <option key={t.id} value={t.id}>
@@ -147,7 +153,12 @@ export function PlanDayPanel({ date, today, tasks, onStart, onPause, onStop, onR
                   </p>
                   <p className="text-xs tabular-nums text-muted">{formatDuration(ms)}</p>
                 </div>
-                <IconButton label={`Remettre à zéro le temps du jour pour ${task.title}`} icon={<RotateCcw className="size-4" />} tone="danger" onClick={() => setReset(task)} />
+                <IconButton
+                  label={`Remettre à zéro le temps du jour pour ${task.title}`}
+                  icon={<RotateCcw className="size-4" />}
+                  tone="danger"
+                  onClick={() => setReset(task)}
+                />
                 <span aria-hidden className={cn('absolute inset-y-0 right-0 w-1', ACCENT_CLASSES[taskAccent(id)].strong)} />
               </li>
             );
@@ -161,7 +172,8 @@ export function PlanDayPanel({ date, today, tasks, onStart, onPause, onStop, onR
         description={
           reset && (
             <>
-              Seul le temps de <strong>{reset.title}</strong> enregistré le <strong>{weekdayShortDate(date)}</strong> sera effacé. Le temps des autres jours est conservé.
+              Seul le temps de <strong>{reset.title}</strong> enregistré le <strong>{weekdayShortDate(date)}</strong> sera effacé. Le temps des autres jours est
+              conservé.
             </>
           )
         }

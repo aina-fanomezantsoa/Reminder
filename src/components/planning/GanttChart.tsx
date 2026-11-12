@@ -73,11 +73,21 @@ export function GanttChart({ tasks, windowStart, days, today, variant, onWindowC
     <div className="flex flex-col gap-3">
       {full && (
         <div className="flex flex-wrap items-center gap-2">
-          <IconButton label="Période précédente" icon={<ChevronLeft className="size-5" />} className="bg-surface shadow-pill" onClick={() => onWindowChange(addDaysLocal(windowStart, -7))} />
+          <IconButton
+            label="Période précédente"
+            icon={<ChevronLeft className="size-5" />}
+            className="bg-surface shadow-pill"
+            onClick={() => onWindowChange(addDaysLocal(windowStart, -7))}
+          />
           <Button variant="secondary" size="sm" onClick={() => onWindowChange(addDaysLocal(today, -2))}>
             Aujourd&apos;hui
           </Button>
-          <IconButton label="Période suivante" icon={<ChevronRight className="size-5" />} className="bg-surface shadow-pill" onClick={() => onWindowChange(addDaysLocal(windowStart, 7))} />
+          <IconButton
+            label="Période suivante"
+            icon={<ChevronRight className="size-5" />}
+            className="bg-surface shadow-pill"
+            onClick={() => onWindowChange(addDaysLocal(windowStart, 7))}
+          />
           <span className="ml-2 text-sm font-medium text-ink" aria-live="polite">
             {rangeLabel}
           </span>
@@ -105,10 +115,17 @@ export function GanttChart({ tasks, windowStart, days, today, variant, onWindowC
                 const dayNum = format(date, 'dd');
                 return (
                   <div key={d} className={cn('flex flex-col items-center justify-center gap-0.5 border-l border-line text-xs', isToday && 'bg-brand/5')}>
-                    <span className={cn('font-medium tabular-nums', isToday ? 'flex size-7 items-center justify-center rounded-full bg-brand text-white' : weekend ? 'text-muted' : 'text-ink')}>
+                    <span
+                      className={cn(
+                        'font-medium tabular-nums',
+                        isToday ? 'flex size-7 items-center justify-center rounded-full bg-brand text-white' : weekend ? 'text-muted' : 'text-ink',
+                      )}
+                    >
                       {dayNum}
                     </span>
-                    <span className={cn('font-medium', isToday ? 'text-brand' : 'text-muted')}>{isToday ? 'Auj.' : dayNum === '01' ? format(date, 'MMM', { locale: fr }) : ' '}</span>
+                    <span className={cn('font-medium', isToday ? 'text-brand' : 'text-muted')}>
+                      {isToday ? 'Auj.' : dayNum === '01' ? format(date, 'MMM', { locale: fr }) : ' '}
+                    </span>
                   </div>
                 );
               })}
@@ -198,7 +215,12 @@ function GanttRow({
           </button>
           {onChangeStatus && (
             <span className="hidden sm:block">
-              <StatusMenu current={task.status} onChange={(st) => onChangeStatus(task.id, st)} onEdit={() => onOpen(task.id)} triggerLabel={`Actions pour ${task.title}`} />
+              <StatusMenu
+                current={task.status}
+                onChange={(st) => onChangeStatus(task.id, st)}
+                onEdit={() => onOpen(task.id)}
+                triggerLabel={`Actions pour ${task.title}`}
+              />
             </span>
           )}
         </div>
@@ -210,10 +232,17 @@ function GanttRow({
         <div
           aria-hidden
           className="absolute inset-0"
-          style={{ backgroundImage: 'linear-gradient(to right, transparent calc(100% - 1px), var(--color-line) calc(100% - 1px))', backgroundSize: `${100 / days}% 100%` }}
+          style={{
+            backgroundImage: 'linear-gradient(to right, transparent calc(100% - 1px), var(--color-line) calc(100% - 1px))',
+            backgroundSize: `${100 / days}% 100%`,
+          }}
         />
         {todayIdx >= 0 && todayIdx < days && (
-          <div aria-hidden className="absolute inset-y-0 border-l-2 border-brand bg-brand/5" style={{ left: `${(todayIdx / days) * 100}%`, width: `${100 / days}%` }} />
+          <div
+            aria-hidden
+            className="absolute inset-y-0 border-l-2 border-brand bg-brand/5"
+            style={{ left: `${(todayIdx / days) * 100}%`, width: `${100 / days}%` }}
+          />
         )}
 
         <button

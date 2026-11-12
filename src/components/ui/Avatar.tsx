@@ -15,7 +15,10 @@ export function Avatar({ label, accent, size = 'md', className }: AvatarProps) {
   const a = ACCENT_CLASSES[accent];
   const initial = (label.trim()[0] ?? '?').toLocaleUpperCase('fr');
   return (
-    <span aria-hidden className={cn('inline-flex shrink-0 items-center justify-center rounded-full font-display font-semibold', a.strong, a.onStrong, SIZES[size], className)}>
+    <span
+      aria-hidden
+      className={cn('inline-flex shrink-0 items-center justify-center rounded-full font-display font-semibold', a.strong, a.onStrong, SIZES[size], className)}
+    >
       {initial}
     </span>
   );

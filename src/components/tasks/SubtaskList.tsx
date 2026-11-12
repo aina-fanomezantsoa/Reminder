@@ -58,9 +58,7 @@ export function SubtaskList({ taskId, subtasks, onAdd, onRename, onToggle, onRem
   return (
     <div className="flex flex-col gap-2">
       {subtasks.length === 0 && <p className="text-sm text-subtle">Aucune sous-tâche.</p>}
-      {subtasks.length > 0 && (
-        <ProgressBar value={subtaskProgress(subtasks)} accent={taskAccent(taskId)} showLabel label="Avancement des sous-tâches" />
-      )}
+      {subtasks.length > 0 && <ProgressBar value={subtaskProgress(subtasks)} accent={taskAccent(taskId)} showLabel label="Avancement des sous-tâches" />}
       <ul className="flex flex-col gap-2">
         {subtasks.map((s) => (
           <li key={s.id} className={cn('flex items-center gap-1 rounded-xl border-l-4 bg-canvas pr-1', accent.border)}>

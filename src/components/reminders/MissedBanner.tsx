@@ -56,7 +56,10 @@ export function MissedBanner({ missed, nextByReminder = {}, onAcknowledge, onAck
           })}
         </ul>
         {rest > 0 && (
-          <Link href="/reminders" className="self-start rounded text-sm font-medium underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
+          <Link
+            href="/reminders"
+            className="self-start rounded text-sm font-medium underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          >
             + {rest} autre{rest > 1 ? 's' : ''}
           </Link>
         )}

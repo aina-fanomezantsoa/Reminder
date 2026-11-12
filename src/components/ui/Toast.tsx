@@ -63,7 +63,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div ref={host} popover="manual" className="pointer-events-none fixed inset-auto bottom-20 right-4 z-[100] m-0 overflow-visible border-0 bg-transparent p-0 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-3 md:bottom-6 md:right-6">
+      <div
+        ref={host}
+        popover="manual"
+        className="pointer-events-none fixed inset-auto bottom-20 right-4 z-[100] m-0 overflow-visible border-0 bg-transparent p-0 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-3 md:bottom-6 md:right-6"
+      >
         {items.map((t) => (
           <ToastView key={t.id} item={t} onDismiss={() => dismiss(t.id)} />
         ))}

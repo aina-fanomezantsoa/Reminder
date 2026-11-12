@@ -72,8 +72,12 @@ function SidebarTimer({ collapsed }: { collapsed: boolean }) {
       className="mt-4 flex flex-col items-center gap-1 rounded-lg bg-brand-soft px-1 py-2 text-xs font-medium tabular-nums text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
     >
       <span aria-hidden className="size-2 animate-pulse rounded-full bg-brand motion-reduce:animate-none" />
-      <span aria-hidden className={cn('max-w-full truncate', !collapsed && 'xl:hidden')}>{clock(timer.elapsed)}</span>
-      <span aria-hidden className={cn('hidden max-w-full truncate', !collapsed && 'xl:inline')}>{d}</span>
+      <span aria-hidden className={cn('max-w-full truncate', !collapsed && 'xl:hidden')}>
+        {clock(timer.elapsed)}
+      </span>
+      <span aria-hidden className={cn('hidden max-w-full truncate', !collapsed && 'xl:inline')}>
+        {d}
+      </span>
     </Link>
   );
 }
@@ -81,7 +85,10 @@ function SidebarTimer({ collapsed }: { collapsed: boolean }) {
 /** Barre d'onglets fixe en bas (mobile, < 768 px). */
 export function BottomNav({ activeHref }: { activeHref: string }) {
   return (
-    <nav aria-label="Navigation principale" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav
+      aria-label="Navigation principale"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden"
+    >
       <MobileTimer />
       <ul className="grid grid-cols-4">
         {NAV_ITEMS.map(({ href, short, Icon }) => {

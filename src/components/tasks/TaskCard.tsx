@@ -29,7 +29,18 @@ export interface TaskCardProps {
 
 const MAX_SUBTASKS = 3;
 
-export function TaskCard({ task, showAttachments, onOpen, onToggleStar, onToggleSubtask, onMove, onDelete, isDragging, dragHandleRef, dragHandleProps }: TaskCardProps) {
+export function TaskCard({
+  task,
+  showAttachments,
+  onOpen,
+  onToggleStar,
+  onToggleSubtask,
+  onMove,
+  onDelete,
+  isDragging,
+  dragHandleRef,
+  dragHandleProps,
+}: TaskCardProps) {
   const done = task.status === 'done';
   const doneCount = task.subtasks.filter((s) => s.done).length;
   const visible = task.subtasks.slice(0, MAX_SUBTASKS);
@@ -38,7 +49,10 @@ export function TaskCard({ task, showAttachments, onOpen, onToggleStar, onToggle
   return (
     <article
       aria-label={task.title}
-      className={cn('flex flex-col gap-3 rounded-2xl bg-surface p-4 xl:p-5 shadow-card transition-opacity duration-150 motion-reduce:transition-none', isDragging && 'opacity-40')}
+      className={cn(
+        'flex flex-col gap-3 rounded-2xl bg-surface p-4 xl:p-5 shadow-card transition-opacity duration-150 motion-reduce:transition-none',
+        isDragging && 'opacity-40',
+      )}
     >
       <div className="flex items-start gap-1">
         <h3 className="min-w-0 flex-1 pt-2.5">
@@ -142,7 +156,10 @@ function CommentHover({ taskId, count }: { taskId: ID; count: number }) {
         <Counter icon="comment" count={count} />
       </button>
       {open && count > 0 && (
-        <div role="tooltip" className="absolute bottom-full left-0 z-20 mb-2 flex max-h-48 w-64 flex-col gap-2 overflow-y-auto rounded-xl bg-surface p-3 text-xs text-ink shadow-card ring-1 ring-black/5">
+        <div
+          role="tooltip"
+          className="absolute bottom-full left-0 z-20 mb-2 flex max-h-48 w-64 flex-col gap-2 overflow-y-auto rounded-xl bg-surface p-3 text-xs text-ink shadow-card ring-1 ring-black/5"
+        >
           {comments === undefined && <p className="text-subtle">Chargement…</p>}
           {comments?.map((c) => (
             <p key={c.id} className="whitespace-pre-wrap break-words">

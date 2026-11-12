@@ -12,9 +12,7 @@ export interface BackupFile {
   data: Record<TableName, unknown[]>;
 }
 
-export type ImportResult =
-  | { ok: true; counts: Record<TableName, number> }
-  | { ok: false; error: string };
+export type ImportResult = { ok: true; counts: Record<TableName, number> } | { ok: false; error: string };
 
 export async function exportBackup(now: number = Date.now()): Promise<BackupFile> {
   const data = {} as Record<TableName, unknown[]>;
@@ -48,7 +46,7 @@ export async function importBackupJson(json: string): Promise<ImportResult> {
     return { ok: false, error: "Ce fichier n'est pas une sauvegarde Reminder." };
   }
   if (f.version > BACKUP_VERSION) {
-    return { ok: false, error: 'Cette sauvegarde provient d\'une version plus récente de Reminder.' };
+    return { ok: false, error: "Cette sauvegarde provient d'une version plus récente de Reminder." };
   }
   const counts = {} as Record<TableName, number>;
   for (const t of TABLES) {

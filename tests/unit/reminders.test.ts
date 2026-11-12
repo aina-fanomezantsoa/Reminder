@@ -4,14 +4,7 @@ import { taskService } from '@/data/services/tasks';
 import { createReminderService } from '@/data/services/reminders';
 import { settingsService } from '@/data/services/settings';
 import { backupFileName, exportBackupJson, importBackupJson } from '@/data/services/backup';
-import {
-  buildTaskCards,
-  calendarGridRange,
-  groupBoard,
-  loadCalendarEntries,
-  loadReminderLists,
-  loadTaskBoard,
-} from '@/data/queries';
+import { buildTaskCards, calendarGridRange, groupBoard, loadCalendarEntries, loadReminderLists, loadTaskBoard } from '@/data/queries';
 import { LATE_GRACE_MS, SAFETY_TICK_MS, nextDelay, processDueReminders } from '@/notifications/scheduler';
 import { toEpochMs } from '@/domain/dates';
 import type { ReminderInput } from '@/domain/types';
@@ -41,7 +34,7 @@ describe('service rappels', () => {
     expect(await svc.create({ ...base, title: '   ' })).toMatchObject({ ok: false, errors: { title: expect.any(String) } });
     expect(await db.reminders.count()).toBe(1);
   });
-  it('refuse une date/heure passée (et l\'instant présent)', async () => {
+  it("refuse une date/heure passée (et l'instant présent)", async () => {
     expect(await svc.create({ ...base, startDate: '2026-04-30' })).toMatchObject({ ok: false, errors: { startDate: expect.any(String) } });
     expect(await svc.create({ ...base, time: '08:00' })).toMatchObject({ ok: false, errors: { startDate: expect.any(String) } });
     expect((await svc.create({ ...base, time: '08:01' })).ok).toBe(true);
@@ -52,7 +45,7 @@ describe('service rappels', () => {
     if (!t.ok) throw new Error();
     expect((await mk({ taskId: t.value.id })).taskId).toBe(t.value.id);
   });
-  it('update : changer l\'heure déplace nextDueAt (CA-R2.3) ; titre seul garde l\'échéance', async () => {
+  it("update : changer l'heure déplace nextDueAt (CA-R2.3) ; titre seul garde l'échéance", async () => {
     const r = await mk();
     const u = await svc.update(r.id, { ...base, time: '10:30' });
     expect(u).toMatchObject({ ok: true, value: { nextDueAt: at('2026-05-01', '10:30') } });
@@ -61,7 +54,7 @@ describe('service rappels', () => {
     expect(await svc.update(r.id, { ...base, startDate: '2026-04-01' })).toMatchObject({ ok: false });
     expect((await svc.update('nope', base)).ok).toBe(false);
   });
-  it('update d\'une série dont l\'ancre est passée : titre modifiable sans refus', async () => {
+  it("update d'une série dont l'ancre est passée : titre modifiable sans refus", async () => {
     const r = await mk({ recurrence: 'daily' });
     clock.now = at('2026-05-10', '12:00');
     await processDueReminders(clock.now);
@@ -88,11 +81,11 @@ describe('service rappels', () => {
 });
 
 describe('scheduler : processDueReminders (horloge simulée)', () => {
-  it('avant l\'échéance : rien', async () => {
+  it("avant l'échéance : rien", async () => {
     await mk();
     expect(await processDueReminders(at('2026-05-01', '08:59'))).toEqual({ fired: [], missed: [] });
   });
-  it('à l\'heure : fired une seule fois (anti-doublon), non récurrent => nextDueAt null', async () => {
+  it("à l'heure : fired une seule fois (anti-doublon), non récurrent => nextDueAt null", async () => {
     const r = await mk({ note: 'n' });
     const res = await processDueReminders(at('2026-05-01', '09:00'));
     expect(res.fired).toHaveLength(1);
@@ -116,7 +109,7 @@ describe('scheduler : processDueReminders (horloge simulée)', () => {
     expect(res.fired).toHaveLength(0);
     expect(res.missed).toMatchObject([{ title: 'B', status: 'missed', acknowledged: false }]);
   });
-  it('récurrent : seule l\'occurrence la plus récente est journalisée, nextDueAt saute au futur', async () => {
+  it("récurrent : seule l'occurrence la plus récente est journalisée, nextDueAt saute au futur", async () => {
     const r = await mk({ recurrence: 'daily' });
     const now = at('2026-05-05', '12:00'); // 09:00 du 5 mai manquée, 2-4 mai ignorées
     const res = await processDueReminders(now);
@@ -137,7 +130,7 @@ describe('scheduler : processDueReminders (horloge simulée)', () => {
     await processDueReminders(at('2026-01-31', '09:00'));
     expect((await db.reminders.get(r.id))?.nextDueAt).toBe(at('2026-02-28', '09:00'));
   });
-  it('rappel supprimé avant l\'échéance : rien', async () => {
+  it("rappel supprimé avant l'échéance : rien", async () => {
     const r = await mk();
     await svc.remove(r.id);
     expect((await processDueReminders(at('2026-05-01', '09:00'))).fired).toHaveLength(0);
@@ -171,7 +164,18 @@ describe('manqués et listes', () => {
 
 describe('builder cartes / board / calendrier', () => {
   it('buildTaskCards : sous-tâches triées, compteurs', () => {
-    const t = { id: 'a', title: 'a', status: 'draft', progress: 0, starred: false, startDate: '2026-05-01', endDate: '2026-05-02', position: 1, createdAt: 1, updatedAt: 1 } as const;
+    const t = {
+      id: 'a',
+      title: 'a',
+      status: 'draft',
+      progress: 0,
+      starred: false,
+      startDate: '2026-05-01',
+      endDate: '2026-05-02',
+      position: 1,
+      createdAt: 1,
+      updatedAt: 1,
+    } as const;
     const subs = [
       { id: 's2', taskId: 'a', title: '2', done: false, position: 2 },
       { id: 's1', taskId: 'a', title: '1', done: true, position: 1 },
@@ -237,7 +241,12 @@ describe('backup JSON', () => {
     const res = await importBackupJson(json);
     expect(res).toMatchObject({ ok: true, counts: { reminders: 1, tasks: 1, subtasks: 1, settings: 1 } });
     expect(await exportBackupJson(1)).toBe(json);
-    for (const bad of ['{', '{}', JSON.stringify({ app: 'reminder', version: 1, data: { reminders: [] } }), JSON.stringify({ app: 'reminder', version: 99, data: {} })]) {
+    for (const bad of [
+      '{',
+      '{}',
+      JSON.stringify({ app: 'reminder', version: 1, data: { reminders: [] } }),
+      JSON.stringify({ app: 'reminder', version: 99, data: {} }),
+    ]) {
       expect((await importBackupJson(bad)).ok).toBe(false);
     }
     expect(await db.tasks.count()).toBe(1);

@@ -6,15 +6,7 @@ import { createReminderService } from '@/data/services/reminders';
 import { exportBackupJson, importBackupJson } from '@/data/services/backup';
 import { settingsService } from '@/data/services/settings';
 import { processDueReminders } from '@/notifications/scheduler';
-import {
-  addDaysLocal,
-  diffDaysLocal,
-  fromEpochMs,
-  isValidLocalDate,
-  isValidLocalTime,
-  timeToMinutes,
-  toEpochMs,
-} from '@/domain/dates';
+import { addDaysLocal, diffDaysLocal, fromEpochMs, isValidLocalDate, isValidLocalTime, timeToMinutes, toEpochMs } from '@/domain/dates';
 import { latestOccurrenceAtOrBefore, nextOccurrenceAfter, occurrenceAt, occurrenceDate } from '@/domain/recurrence';
 import { commentSchema, reminderInputSchema, subtaskTitleSchema, taskPatchSchema, validate } from '@/domain/schemas';
 import { applyTaskRules, positionBetween } from '@/domain/task-rules';
@@ -272,8 +264,17 @@ describe('QA service rappels', () => {
 
 describe('QA stats', () => {
   const mkTask = (o: Partial<Task>): Task => ({
-    id: Math.random().toString(), title: 't', status: 'draft', progress: 0, starred: false,
-    startDate: '2026-05-01', endDate: '2026-05-02', position: 1, createdAt: 0, updatedAt: 0, ...o,
+    id: Math.random().toString(),
+    title: 't',
+    status: 'draft',
+    progress: 0,
+    starred: false,
+    startDate: '2026-05-01',
+    endDate: '2026-05-02',
+    position: 1,
+    createdAt: 0,
+    updatedAt: 0,
+    ...o,
   });
   it('rings : progress hors bornes borne, limite non entiere', () => {
     const r = computeRings([mkTask({ progress: 150 }), mkTask({ progress: -5 })], 2.9);

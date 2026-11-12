@@ -36,8 +36,7 @@ export function CompletedHistogram({ data, size, today }: CompletedHistogramProp
   const plotH = chart;
 
   const ariaLabel =
-    `Tâches terminées sur ${data.length} jours : ` +
-    data.map((d) => `${format(parseLocalDate(d.date), 'EEEE d', { locale: fr })} : ${d.count}`).join(', ');
+    `Tâches terminées sur ${data.length} jours : ` + data.map((d) => `${format(parseLocalDate(d.date), 'EEEE d', { locale: fr })} : ${d.count}`).join(', ');
 
   return (
     <div>

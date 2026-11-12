@@ -3,16 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db';
-import {
-  loadCalendarEntries,
-  loadReminderLists,
-  loadTask,
-  loadTaskBoard,
-  loadTaskComments,
-  loadTaskReminders,
-  loadTasks,
-  type ReminderLists,
-} from './queries';
+import { loadCalendarEntries, loadReminderLists, loadTask, loadTaskBoard, loadTaskComments, loadTaskReminders, loadTasks, type ReminderLists } from './queries';
 import { timerService } from './services/timer';
 import { DEFAULT_PROFILE, settingsService, type NotificationPromptState } from './services/settings';
 import { completedPerDay, computeRings } from '@/domain/stats';
@@ -39,9 +30,7 @@ import type {
  */
 
 /** Dashboard. `ringsLimit` : 4 (panneau droit), 8 (page Tableau de bord). `totalTasks` : "Voir toutes les tâches (n)". */
-export function useDashboard(
-  ringsLimit = 4,
-): { rings: RingMetric[]; completed: BarDatum[]; totalTasks: number } | undefined {
+export function useDashboard(ringsLimit = 4): { rings: RingMetric[]; completed: BarDatum[]; totalTasks: number } | undefined {
   return useLiveQuery(async () => {
     const tasks = await db.tasks.toArray();
     return {
@@ -89,9 +78,7 @@ export function useReminders(): ReminderLists | undefined {
  * Calendrier mensuel. `monthStart` : n'importe quel jour du mois ('YYYY-MM-DD'), normalisé au 1er.
  * Les entrées couvrent la grille complète de 6 semaines lundi-dimanche (jours des mois voisins inclus).
  */
-export function useCalendarEntries(
-  monthStart: LocalDate,
-): { tasks: Task[]; reminders: ReminderOccurrence[] } | undefined {
+export function useCalendarEntries(monthStart: LocalDate): { tasks: Task[]; reminders: ReminderOccurrence[] } | undefined {
   return useLiveQuery(() => loadCalendarEntries(monthStart), [monthStart]);
 }
 
@@ -105,9 +92,7 @@ export function useDaySessions(date: LocalDate): TimeSession[] | undefined {
     const from = parseLocalDate(addDaysLocal(date, -1)).getTime();
     const rows = await db.timeSessions.where('start').between(from, dayEnd, true, false).toArray();
     const open = await db.timeSessions.filter((s) => s.end === undefined && s.start < from).toArray();
-    return [...open, ...rows]
-      .filter((s) => s.end === undefined || s.end > dayStart)
-      .sort((a, b) => a.start - b.start);
+    return [...open, ...rows].filter((s) => s.end === undefined || s.end > dayStart).sort((a, b) => a.start - b.start);
   }, [date]);
 }
 
