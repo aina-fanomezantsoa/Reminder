@@ -2,7 +2,7 @@
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | undefined> {
   if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return undefined;
   try {
-    return await navigator.serviceWorker.register('/sw.js');
+    return await navigator.serviceWorker.register(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/sw.js`);
   } catch {
     return undefined;
   }
