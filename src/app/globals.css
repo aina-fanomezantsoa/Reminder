@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+/* Tokens du designer (DESIGN.md section 5). */
+@theme {
+  --color-canvas: #f7f6f3;
+  --color-stage: #efede9;
+  --color-surface: #ffffff;
+  --color-line: #e5e2dc;
+  --color-ink: #1c1917;
+  --color-body: #44403c;
+  --color-muted: #57534e;
+  --color-subtle: #6b665f;
+  --color-brand: #1f56d8;
+  --color-brand-soft: #e8eefb;
+
+  --color-ocean: #2563eb;
+  --color-ocean-soft: #9dbdf5;
+  --color-ocean-ink: #1e3a8a;
+  --color-grape: #7c3aed;
+  --color-grape-soft: #c9b6f8;
+  --color-grape-ink: #4c1d95;
+  --color-orchid: #c026d3;
+  --color-orchid-soft: #f2b1f0;
+  --color-orchid-ink: #701a75;
+  --color-sun: #f5b31b;
+  --color-sun-soft: #fbe2a1;
+  --color-sun-ink: #78350f;
+
+  --color-st-draft: #06b6d4;
+  --color-st-draft-ink: #0e7490;
+  --color-st-progress: #2563eb;
+  --color-st-progress-ink: #1d4ed8;
+  --color-st-editing: #7c3aed;
+  --color-st-editing-ink: #6d28d9;
+  --color-st-done: #16a34a;
+  --color-st-done-ink: #15803d;
+
+  --color-star: #f5b31b;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-card: 0 1px 2px rgb(28 25 23 / 0.05), 0 4px 12px -4px rgb(28 25 23 / 0.06);
+  --shadow-card-lg: 0 8px 24px rgb(28 25 23 / 0.08);
+  --shadow-pill: 0 1px 2px rgb(28 25 23 / 0.06);
+}
+
+html {
+  background: var(--color-canvas);
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-body);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-sans);
+}
+
+dialog::backdrop {
+  background: rgb(28 25 23 / 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
